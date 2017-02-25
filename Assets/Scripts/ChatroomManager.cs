@@ -8,11 +8,14 @@ public class ChatroomManager : MonoBehaviour
     public Message MessagePrefab;
 
     private Transform messages;
-    private float offset;
+    private float targetTotalOffset;
+    private float messageOffset;
 
     public void Start()
     {
         messages = transform.FindChild("Messages");
+        targetTotalOffset = ((RectTransform)transform).sizeDelta.y / 2 - 0.15f;
+        messages.transform.localPosition = new Vector3(0, targetTotalOffset, 0);
     }
 
     public void Update()
@@ -22,9 +25,14 @@ public class ChatroomManager : MonoBehaviour
         {
             string text = "Test message: ";
             for(int i = 0; i < Random.Range(0, 20); i++)
-                text += "a";
+                text += "a ";
             AddMessage("Guy", text);
         }
+    }
+
+    public void FixedUpdate()
+    {
+        messages.transform.localPosition = Vector3.Lerp(messages.transform.localPosition, new Vector3(0, targetTotalOffset, 0), 0.1f);
     }
 
     public void AddMessage(string speaker, string message)
@@ -36,10 +44,9 @@ public class ChatroomManager : MonoBehaviour
         // Calculate offsets
         temp.transform.SetParent(messages);
         float height = temp.GetComponent<Text>().preferredHeight;
-        temp.transform.localPosition += new Vector3(0, -offset * temp.transform.localScale.y, 0);
-        offset += height;
-        float totalOffset = Mathf.Max(((RectTransform)transform).sizeDelta.y / 2 - 0.15f, 
-            -((RectTransform)transform).sizeDelta.y / 2 + offset * temp.transform.localScale.y - 0.1f);
-        messages.localPosition = new Vector3(0, totalOffset, 0);
+        temp.transform.localPosition += new Vector3(0, -messageOffset * temp.transform.localScale.y, 0);
+        messageOffset += height;
+        targetTotalOffset = Mathf.Max(((RectTransform)transform).sizeDelta.y / 2 - 0.15f, 
+            -((RectTransform)transform).sizeDelta.y / 2 + messageOffset * temp.transform.localScale.y - 0.1f);
     }
 }
