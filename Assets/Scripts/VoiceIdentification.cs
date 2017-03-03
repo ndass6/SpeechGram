@@ -28,17 +28,7 @@ public class VoiceIdentification : MonoBehaviour {
     public void EnrollUser(Stream audioStream)
     {
         // TODO Create the user profile
-
-        // TODO Retrieve the created profile and store it
-        Debug.Log("Created user profile");
-
-        // TODO Call the enroll API
-        Debug.Log("Enrolling");
-
-        // TODO Return to the original caller while continuing this call to verify
-        
-        // TODO verify enrollement
-        Debug.Log("Enrollment done");
+        CreateProfile(audioStream);
     }
 
     public void IdentifyUser(Stream audioStream, Action<string> callback)
@@ -53,7 +43,7 @@ public class VoiceIdentification : MonoBehaviour {
         // TODO call the callback
     }
 
-    #region API Methods
+    #region API calls
 
     private void CreateProfile(Stream audioStream)
     {
@@ -62,20 +52,26 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Construct the www form
         WWWForm form = new WWWForm();
+        // TODO add headers
 
         // Call the api endpoint
         WWW www = new WWW(PROFILE_ENDPOINT, form);
         StartCoroutine(CreateProfileRequest(www, audioStream, HandleCreateProfile));
     }
 
-    #endregion
-
-    #region API response handlers
-
-    private void HandleCreateProfile(string res, Stream audioStream)
+    private void EnrollUser(string id, Stream audioStream)
     {
-        // TODO figure out how to do real json parsing
-        string id = res.Substring(34, 36);
+        // Enroll the user with the audio file
+        // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c3271984551c84ec6797
+
+        // Construct the www form
+        WWWForm form = new WWWForm();
+        // TODO add headers
+
+        // Call the api endpoint
+        // TODO set parameters
+        WWW www = new WWW(PROFILE_ENDPOINT, form);
+        StartCoroutine(EnrollUserRequest(www, HandleEnrollUser));
     }
 
     #endregion
@@ -94,6 +90,44 @@ public class VoiceIdentification : MonoBehaviour {
         {
             Debug.Log("ERROR: " + www.error + "\n" + www.text);
         }
+    }
+
+    private IEnumerator EnrollUserRequest(WWW www, Action<string> callback)
+    {
+        yield return www;
+
+        if (www.error == null)
+        {
+            callback(www.text);
+        }
+        else
+        {
+            Debug.Log("ERROR: " + www.error + "\n" + www.text);
+        }
+    }
+
+    #endregion
+
+    #region API response handlers
+
+    private void HandleCreateProfile(string res, Stream audioStream)
+    {
+        Debug.Log("Created user profile");
+
+        // TODO figure out how to do real json parsing :(
+        string id = res.Substring(34, 36);
+
+        // We have a new id for the user profile now... enroll the new user
+        EnrollUser(id, audioStream);
+    }
+
+    private void HandleEnrollUser(string response)
+    {
+        Debug.Log("Enrolling");
+
+        // TODO parse xml for the query endpoint
+
+        // TODO verify enrollement
     }
 
     #endregion
