@@ -10,8 +10,8 @@ public class VoiceIdentification : MonoBehaviour {
     // API endpoints
     public static readonly string PROFILE_ENDPOINT = "https://westus.api.cognitive.microsoft.com/spid/v1.0/identificationProfiles";
 
-    // TODO storing the key in not plaintext!
-    private string key = "KEY GOES HERE";
+    // FIXME storing the key in not plaintext!
+    private static readonly string KEY = "KEY GOES HERE";
 
     void Start () {
 		// DEBUG on start
@@ -21,13 +21,13 @@ public class VoiceIdentification : MonoBehaviour {
         // DEBUG on mouse click
         if (Input.GetMouseButtonDown(0))
         {
-            // TODO
+            
         }
     }
 
-    public void EnrollUser(Stream audioStream)
+    public void MakeNewUser(Stream audioStream)
     {
-        // TODO Create the user profile
+        // Create the user profile
         CreateProfile(audioStream);
     }
 
@@ -52,9 +52,9 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Construct the www form
         WWWForm form = new WWWForm();
-        // TODO add headers
+        form.AddField("Ocp-Apim-Subscription-Key", KEY);
 
-        // Call the api endpoint
+        // Call the api endpoint (POST)
         WWW www = new WWW(PROFILE_ENDPOINT, form);
         StartCoroutine(CreateProfileRequest(www, audioStream, HandleCreateProfile));
     }
@@ -66,11 +66,15 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Construct the www form
         WWWForm form = new WWWForm();
-        // TODO add headers
+        form.AddField("Ocp-Apim-Subscription-Key", KEY);
 
-        // Call the api endpoint
-        // TODO set parameters
-        WWW www = new WWW(PROFILE_ENDPOINT, form);
+        // Set the request parameters in the url
+        string url = PROFILE_ENDPOINT + "/" + id + "/enroll?shortAudio=true";
+
+        // TODO set audio up in the request body
+
+        // Call the api endpoint (POST)
+        WWW www = new WWW(url, form);
         StartCoroutine(EnrollUserRequest(www, HandleEnrollUser));
     }
 
@@ -112,10 +116,9 @@ public class VoiceIdentification : MonoBehaviour {
 
     private void HandleCreateProfile(string res, Stream audioStream)
     {
-        Debug.Log("Created user profile");
-
-        // TODO figure out how to do real json parsing :(
+        // FIXME figure out how to do real json parsing :(
         string id = res.Substring(34, 36);
+        Debug.Log("Created user profile " + id);
 
         // We have a new id for the user profile now... enroll the new user
         EnrollUser(id, audioStream);
@@ -124,6 +127,7 @@ public class VoiceIdentification : MonoBehaviour {
     private void HandleEnrollUser(string response)
     {
         Debug.Log("Enrolling");
+        Debug.Log(response);
 
         // TODO parse xml for the query endpoint
 
