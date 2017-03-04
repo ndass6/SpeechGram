@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
-using System.Net;
 using System.Text;
 
 public class VoiceIdentification : MonoBehaviour {
@@ -12,7 +11,7 @@ public class VoiceIdentification : MonoBehaviour {
     public static readonly string PROFILE_ENDPOINT = "https://westus.api.cognitive.microsoft.com/spid/v1.0/identificationProfiles";
 
     // FIXME storing the key in not plaintext!
-    private static readonly string KEY = "KEY GOES HERE";
+    private static readonly string KEY = "c7c70ee76b594bfd9dc7fa0d016fc462";
 
     void Start () {
 		// DEBUG on start
@@ -26,13 +25,13 @@ public class VoiceIdentification : MonoBehaviour {
         }
     }
 
-    public void MakeNewUser(Stream audioStream)
+    public void MakeNewUser(byte[] audio)
     {
         // Create the user profile
-        CreateProfile(audioStream);
+        CreateProfile(audio);
     }
 
-    public void IdentifyUser(Stream audioStream, Action<string> callback)
+    public void IdentifyUser(byte[] audio, Action<string> callback)
     {
         // TODO Call the Identify API
         
@@ -46,7 +45,7 @@ public class VoiceIdentification : MonoBehaviour {
 
     #region API calls
 
-    private void CreateProfile(Stream audioStream)
+    private void CreateProfile(byte[] audio)
     {
         // Create the user profile by calling the api
         // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c068e597ed22ec38f42e
@@ -61,16 +60,22 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Call the api endpoint (POST)
         WWW www = new WWW(PROFILE_ENDPOINT, Encoding.ASCII.GetBytes(body.ToCharArray()), headers);
-        StartCoroutine(CreateProfileRequest(www, audioStream, HandleCreateProfile));
+        StartCoroutine(CreateProfileRequest(www, audio, HandleCreateProfile));
     }
 
-    private void EnrollUser(string id, Stream audioStream)
+    private void EnrollUser(string id, byte[] audio)
     {
         // Enroll the user with the audio file
         // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c3271984551c84ec6797
 
+        // Boundary for the multipart/form-data
+        string boundary = "Upload----" + DateTime.Now.ToString("u");
+
         // Construct the headers
-        Dictionary<string, string> headers = new Dictionary<string, string>();
+        WWWForm form = new WWWForm();
+        form.AddBinaryData("Data", audio, "testFile_" + DateTime.Now.ToString("u"));
+        Dictionary<string, string> headers = form.headers;
+        // headers.Add("Content-Type", "multipart/form-data; boundary=" + boundary);
         headers.Add("Content-Type", "multipart/form-data");
         headers.Add("Ocp-Apim-Subscription-Key", KEY);
 
@@ -82,7 +87,7 @@ public class VoiceIdentification : MonoBehaviour {
         string body = "TODO";
 
         // Call the api endpoint (POST)
-        WWW www = new WWW(url, Encoding.ASCII.GetBytes(body.ToCharArray()), headers);
+        WWW www = new WWW(url, form);
         StartCoroutine(EnrollUserRequest(www, HandleEnrollUser));
     }
 
@@ -90,13 +95,13 @@ public class VoiceIdentification : MonoBehaviour {
 
     #region API request coroutine
 
-    private IEnumerator CreateProfileRequest(WWW www, Stream audioStream, Action<string, Stream> callback)
+    private IEnumerator CreateProfileRequest(WWW www, byte[] audio, Action<string, byte[]> callback)
     {
         yield return www;
 
         if (www.error == null)
         {
-            callback(www.text, audioStream);
+            callback(www.text, audio);
         }
         else
         {
@@ -122,14 +127,14 @@ public class VoiceIdentification : MonoBehaviour {
 
     #region API response handlers
 
-    private void HandleCreateProfile(string res, Stream audioStream)
+    private void HandleCreateProfile(string res, byte[] audio)
     {
         // FIXME figure out how to do real json parsing :(
         string id = res.Substring(34, 36);
         Debug.Log("Created user profile " + id);
 
         // We have a new id for the user profile now... enroll the new user
-        EnrollUser(id, audioStream);
+        EnrollUser(id, audio);
     }
 
     private void HandleEnrollUser(string response)
