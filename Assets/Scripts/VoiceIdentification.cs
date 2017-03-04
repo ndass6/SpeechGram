@@ -21,7 +21,22 @@ public class VoiceIdentification : MonoBehaviour {
         // DEBUG on mouse click
         if (Input.GetMouseButtonDown(0))
         {
-            
+            AudioSource source = GetComponent<AudioSource>();
+
+            float[] samples = new float[source.clip.samples * source.clip.channels];
+            source.clip.GetData(samples, 0);
+            int i = 0;
+            while (i < samples.Length)
+            {
+                samples[i] = samples[i] * 0.5F;
+                ++i;
+            }
+            source.clip.SetData(samples, 0);
+
+            var byteArray = new byte[samples.Length * 4];
+            Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
+
+            MakeNewUser(byteArray);
         }
     }
 
@@ -75,19 +90,18 @@ public class VoiceIdentification : MonoBehaviour {
         WWWForm form = new WWWForm();
         form.AddBinaryData("Data", audio, "testFile_" + DateTime.Now.ToString("u"));
         Dictionary<string, string> headers = form.headers;
-        // headers.Add("Content-Type", "multipart/form-data; boundary=" + boundary);
-        headers.Add("Content-Type", "multipart/form-data");
         headers.Add("Ocp-Apim-Subscription-Key", KEY);
 
         // Set the request parameters in the url
         // FIXME determine short audio based on length of sound file
         string url = PROFILE_ENDPOINT + "/" + id + "/enroll?shortAudio=true";
+        Debug.Log("URL = " + url);
 
         // TODO Set audio up in the request body
         string body = "TODO";
 
         // Call the api endpoint (POST)
-        WWW www = new WWW(url, form);
+        WWW www = new WWW(url, form.data, headers);
         StartCoroutine(EnrollUserRequest(www, HandleEnrollUser));
     }
 
@@ -129,8 +143,10 @@ public class VoiceIdentification : MonoBehaviour {
 
     private void HandleCreateProfile(string res, byte[] audio)
     {
+        Debug.Log(res);
+
         // FIXME figure out how to do real json parsing :(
-        string id = res.Substring(34, 36);
+        string id = res.Substring(34, 35);
         Debug.Log("Created user profile " + id);
 
         // We have a new id for the user profile now... enroll the new user
