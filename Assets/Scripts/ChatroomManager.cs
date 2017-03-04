@@ -18,18 +18,6 @@ public class ChatroomManager : MonoBehaviour
         messages.transform.localPosition = new Vector3(0, targetTotalOffset, 0);
     }
 
-    public void Update()
-    {
-        // Temporary input
-        if(Input.GetMouseButtonDown(0))
-        {
-            string text = "Test message: ";
-            for(int i = 0; i < Random.Range(0, 20); i++)
-                text += "a ";
-            AddMessage("Guy", text);
-        }
-    }
-
     public void FixedUpdate()
     {
         messages.transform.localPosition = Vector3.Lerp(messages.transform.localPosition, new Vector3(0, targetTotalOffset, 0), 0.1f);
