@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using System;
 using System.Net;
+using System.Text;
 
 public class VoiceIdentification : MonoBehaviour {
 
@@ -50,12 +51,16 @@ public class VoiceIdentification : MonoBehaviour {
         // Create the user profile by calling the api
         // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c068e597ed22ec38f42e
 
-        // Construct the www form
-        WWWForm form = new WWWForm();
-        form.AddField("Ocp-Apim-Subscription-Key", KEY);
+        // Construct the headers
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("Content-Type", "application/json");
+        headers.Add("Ocp-Apim-Subscription-Key", KEY);
+
+        // Define the payload
+        string body = "{\"locale\":\"en-us\"}";
 
         // Call the api endpoint (POST)
-        WWW www = new WWW(PROFILE_ENDPOINT, form);
+        WWW www = new WWW(PROFILE_ENDPOINT, Encoding.ASCII.GetBytes(body.ToCharArray()), headers);
         StartCoroutine(CreateProfileRequest(www, audioStream, HandleCreateProfile));
     }
 
@@ -64,17 +69,20 @@ public class VoiceIdentification : MonoBehaviour {
         // Enroll the user with the audio file
         // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c3271984551c84ec6797
 
-        // Construct the www form
-        WWWForm form = new WWWForm();
-        form.AddField("Ocp-Apim-Subscription-Key", KEY);
+        // Construct the headers
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("Content-Type", "multipart/form-data");
+        headers.Add("Ocp-Apim-Subscription-Key", KEY);
 
         // Set the request parameters in the url
+        // FIXME determine short audio based on length of sound file
         string url = PROFILE_ENDPOINT + "/" + id + "/enroll?shortAudio=true";
 
-        // TODO set audio up in the request body
+        // TODO Set audio up in the request body
+        string body = "TODO";
 
         // Call the api endpoint (POST)
-        WWW www = new WWW(url, form);
+        WWW www = new WWW(url, Encoding.ASCII.GetBytes(body.ToCharArray()), headers);
         StartCoroutine(EnrollUserRequest(www, HandleEnrollUser));
     }
 
