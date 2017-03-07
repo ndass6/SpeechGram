@@ -44,8 +44,13 @@ public class VoiceIdentification : MonoBehaviour {
             String userid = "2994f28f-d03e-4d5a-80fa-1bef4ea5f586";
             userIds.Add(userid);
             userIds.Add("804a1623-f49d-4fe8-a09b-7cc3bfeda915");
-            IdentifyUser(byteArray, null);
+            IdentifyUser(byteArray, Test);
         }
+    }
+
+    private void Test(string uid)
+    {
+        Debug.Log("Called with uid = " + uid);
     }
 
     public void MakeNewUser(byte[] audio)
@@ -102,7 +107,7 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Call the api endpoint (POST)
         WWW www = new WWW(url, form.data, headers);
-        StartCoroutine(AudioRequest(www, HandleEnrollUser));
+        StartCoroutine(EnrollUserRequest(www, HandleEnrollUser));
     }
 
     public void IdentifyRequestAPI(byte[] audio, Action<string> onUserIdentified)
@@ -134,7 +139,49 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Call the api endpoint (POST)
         WWW www = new WWW(url, form.data, headers);
-        StartCoroutine(AudioRequest(www, HandleIdentifyUser));
+        StartCoroutine(IdentifyUserRequest(www, onUserIdentified, HandleIdentifyUser));
+    }
+
+    public IEnumerator QueryForIdentificationAPI(String url, Action<string> onUserIdentified)
+    {
+        string code = "failed";
+        string uid = "";
+        bool done = false;
+        for (int i = 0; i < 10 && !done; i++)
+        {
+            // Wait a little bit of time before API calls
+            yield return new WaitForSeconds(2.0f);
+
+            // Query for the identify operation to finish
+            // https://dev.projectoxford.ai/docs/services/563309b6778daf02acc0a508/operations/5645c725ca73070ee8845bd6
+
+            // Construct the headers
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            headers.Add("Ocp-Apim-Subscription-Key", KEY);
+
+            // Call the api endpoint (GET)
+            WWW www = new WWW(url);
+            yield return www;
+
+            // Check the status
+            string res = www.text;
+            Debug.Log(www.text);
+            string[] split = res.Split('\"');
+
+            // Find the status code in the json
+            code = split[3];
+            if (code.Equals("success") || code.Equals("failed"))
+            {
+                done = true;
+                uid = split[17];
+            }
+        }
+
+        if (code.Equals("sucess"))
+        {
+            Debug.Log("Identified with uid = " + uid);
+            onUserIdentified(uid);
+        }
     }
 
     #endregion
@@ -155,13 +202,27 @@ public class VoiceIdentification : MonoBehaviour {
         }
     }
 
-    private IEnumerator AudioRequest(WWW www, Action<Dictionary<string, string>> callback)
+    private IEnumerator EnrollUserRequest(WWW www, Action<Dictionary<string, string>> callback)
     {
         yield return www;
 
         if (www.error == null)
         {
             callback(www.responseHeaders);
+        }
+        else
+        {
+            Debug.Log("ERROR: " + www.error + "\n" + www.text);
+        }
+    }
+
+    private IEnumerator IdentifyUserRequest(WWW www, Action<string> onUserIdentified, Action<Dictionary<string, string>, Action<string>> callback)
+    {
+        yield return www;
+
+        if (www.error == null)
+        {
+            callback(www.responseHeaders, onUserIdentified);
         }
         else
         {
@@ -187,14 +248,17 @@ public class VoiceIdentification : MonoBehaviour {
         EnrollUserAPI(id, audio);
     }
 
-    private void HandleEnrollUser(Dictionary<string, string> response)
+    private void HandleEnrollUser(Dictionary<string, string> responseHeaders)
     {
-        Debug.Log("Enrolling at " + response["Operation-Location"]);
+        Debug.Log("Enrolling at " + responseHeaders["Operation-Location"]);
     }
 
-    private void HandleIdentifyUser(Dictionary<string, string> response)
+    private void HandleIdentifyUser(Dictionary<string, string> responseHeaders, Action<string> onUserIdentified)
     {
-        Debug.Log("Identifying at " + response["Operation-Location"]);
+        string url = responseHeaders["Operation-Location"];
+        Debug.Log("Identifying at " + url);
+
+        StartCoroutine(QueryForIdentificationAPI(url, onUserIdentified));
     }
 
     #endregion
