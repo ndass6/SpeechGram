@@ -9,9 +9,13 @@ public class VoiceIdentification : MonoBehaviour {
 
     // API endpoints
     public static readonly string PROFILE_ENDPOINT = "https://westus.api.cognitive.microsoft.com/spid/v1.0/identificationProfiles";
+    public static readonly string IDENTIFY_ENDPOINT = "https://westus.api.cognitive.microsoft.com/spid/v1.0/identify";
 
-    // FIXME storing the key in not plaintext!
+    // API key
     private static readonly string KEY = "c7c70ee76b594bfd9dc7fa0d016fc462";
+
+    // Users ids that is used for the identification request
+    HashSet<string> userIds = new HashSet<string>(); 
 
     void Start () {
         // DEBUG on start
@@ -36,31 +40,28 @@ public class VoiceIdentification : MonoBehaviour {
             var byteArray = new byte[samples.Length * 4];
             Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
 
-            MakeNewUser(byteArray);
+            // MakeNewUser(byteArray);
+            String userid = "2994f28f-d03e-4d5a-80fa-1bef4ea5f586";
+            userIds.Add(userid);
+            userIds.Add("804a1623-f49d-4fe8-a09b-7cc3bfeda915");
+            IdentifyUser(byteArray, null);
         }
     }
 
     public void MakeNewUser(byte[] audio)
     {
         // Create the user profile
-        CreateProfile(audio);
+        CreateProfileAPI(audio);
     }
 
-    public void IdentifyUser(byte[] audio, Action<string> callback)
+    public void IdentifyUser(byte[] audio, Action<string> onUserIdentified)
     {
-        // TODO Call the Identify API
-        
-        // TODO Return to the caller, call the callback when we get a result
-        
-        // TODO verify the enrollement
-        Debug.Log("Identification done");
-
-        // TODO call the callback
+        IdentifyRequestAPI(audio, onUserIdentified);
     }
 
     #region API calls
 
-    private void CreateProfile(byte[] audio)
+    private void CreateProfileAPI(byte[] audio)
     {
         // Create the user profile by calling the api
         // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c068e597ed22ec38f42e
@@ -78,7 +79,7 @@ public class VoiceIdentification : MonoBehaviour {
         StartCoroutine(CreateProfileRequest(www, audio, HandleCreateProfile));
     }
 
-    private void EnrollUser(string id, byte[] audio)
+    private void EnrollUserAPI(string id, byte[] audio)
     {
         // Enroll the user with the audio file
         // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c3271984551c84ec6797
@@ -87,9 +88,6 @@ public class VoiceIdentification : MonoBehaviour {
         MemoryStream stream = new MemoryStream();
         WAV.WriteWavHeader(stream, false, 1, 16, 16000, audio.Length);
         stream.Write(audio, 0, audio.Length);
-
-        // Boundary for the multipart/form-data
-        string boundary = "Upload----" + DateTime.Now.ToString("u");
 
         // Construct the headers
         WWWForm form = new WWWForm();
@@ -100,14 +98,43 @@ public class VoiceIdentification : MonoBehaviour {
         // Set the request parameters in the url
         // FIXME determine short audio based on length of sound file
         string url = PROFILE_ENDPOINT + "/" + id + "/enroll?shortAudio=true";
-        Debug.Log("URL = " + url);
-
-        // TODO Set audio up in the request body
-        string body = "TODO";
+        Debug.Log("Enroll URL = " + url);
 
         // Call the api endpoint (POST)
         WWW www = new WWW(url, form.data, headers);
-        StartCoroutine(EnrollUserRequest(www, HandleEnrollUser));
+        StartCoroutine(AudioRequest(www, HandleEnrollUser));
+    }
+
+    public void IdentifyRequestAPI(byte[] audio, Action<string> onUserIdentified)
+    {
+        // Create a Identification Request
+        // https://dev.projectoxford.ai/docs/services/563309b6778daf02acc0a508/operations/5645c523778daf217c292592
+
+        // Convert the byte[] to a WAV file
+        MemoryStream stream = new MemoryStream();
+        WAV.WriteWavHeader(stream, false, 1, 16, 16000, audio.Length);
+        stream.Write(audio, 0, audio.Length);
+
+        // Construct the headers
+        WWWForm form = new WWWForm();
+        form.AddBinaryData("Data", stream.GetBuffer(), "testFile_" + DateTime.Now.ToString("u"));
+        Dictionary<string, string> headers = form.headers;
+        headers.Add("Ocp-Apim-Subscription-Key", KEY);
+
+        // Set the request parameters in the url
+        // FIXME determine short audio based on length of sound file
+        string url = IDENTIFY_ENDPOINT + "?identificationProfileIds=";
+        foreach (string uid in userIds)
+        {
+            url += uid + ",";
+        }
+        url = url.Substring(0, url.Length - 1);
+        url += "&enroll?shortAudio=true";
+        Debug.Log("Identify URL = " + url);
+
+        // Call the api endpoint (POST)
+        WWW www = new WWW(url, form.data, headers);
+        StartCoroutine(AudioRequest(www, HandleIdentifyUser));
     }
 
     #endregion
@@ -128,7 +155,7 @@ public class VoiceIdentification : MonoBehaviour {
         }
     }
 
-    private IEnumerator EnrollUserRequest(WWW www, Action<Dictionary<string, string>> callback)
+    private IEnumerator AudioRequest(WWW www, Action<Dictionary<string, string>> callback)
     {
         yield return www;
 
@@ -153,19 +180,21 @@ public class VoiceIdentification : MonoBehaviour {
         // FIXME figure out how to do real json parsing
         string[] split = res.Split('\"');
         string id = split[3];
+        userIds.Add(id);
         Debug.Log("Created user profile " + id);
 
         // We have a new id for the user profile now... enroll the new user
-        EnrollUser(id, audio);
+        EnrollUserAPI(id, audio);
     }
 
     private void HandleEnrollUser(Dictionary<string, string> response)
     {
         Debug.Log("Enrolling at " + response["Operation-Location"]);
+    }
 
-        // TODO parse xml for the query endpoint
-
-        // TODO verify enrollement
+    private void HandleIdentifyUser(Dictionary<string, string> response)
+    {
+        Debug.Log("Identifying at " + response["Operation-Location"]);
     }
 
     #endregion
