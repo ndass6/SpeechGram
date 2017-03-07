@@ -11,47 +11,12 @@ public class VoiceIdentification : MonoBehaviour {
     public static readonly string PROFILE_ENDPOINT = "https://westus.api.cognitive.microsoft.com/spid/v1.0/identificationProfiles";
     public static readonly string IDENTIFY_ENDPOINT = "https://westus.api.cognitive.microsoft.com/spid/v1.0/identify";
 
+
     // API key
     private static readonly string KEY = "c7c70ee76b594bfd9dc7fa0d016fc462";
 
     // Users ids that is used for the identification request
     HashSet<string> userIds = new HashSet<string>(); 
-
-    void Start () {
-        // DEBUG on start
-    }
-	
-	void Update () {
-        // DEBUG on mouse click
-        if (Input.GetMouseButtonDown(0))
-        {
-            AudioSource source = GetComponent<AudioSource>();
-
-            float[] samples = new float[source.clip.samples * source.clip.channels];
-            source.clip.GetData(samples, 0);
-            int i = 0;
-            while (i < samples.Length)
-            {
-                samples[i] = samples[i] * 0.5F;
-                ++i;
-            }
-            source.clip.SetData(samples, 0);
-
-            var byteArray = new byte[samples.Length * 4];
-            Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
-
-            // MakeNewUser(byteArray);
-            String userid = "2994f28f-d03e-4d5a-80fa-1bef4ea5f586";
-            userIds.Add(userid);
-            userIds.Add("804a1623-f49d-4fe8-a09b-7cc3bfeda915");
-            IdentifyUser(byteArray, Test);
-        }
-    }
-
-    private void Test(string uid)
-    {
-        Debug.Log("Called with uid = " + uid);
-    }
 
     public void MakeNewUser(byte[] audio)
     {
@@ -160,7 +125,7 @@ public class VoiceIdentification : MonoBehaviour {
             headers.Add("Ocp-Apim-Subscription-Key", KEY);
 
             // Call the api endpoint (GET)
-            WWW www = new WWW(url);
+            WWW www = new WWW(url, null, headers);
             yield return www;
 
             // Check the status
@@ -170,14 +135,14 @@ public class VoiceIdentification : MonoBehaviour {
 
             // Find the status code in the json
             code = split[3];
-            if (code.Equals("success") || code.Equals("failed"))
+            if (code.Equals("succeeded") || code.Equals("failed"))
             {
                 done = true;
                 uid = split[17];
             }
         }
 
-        if (code.Equals("sucess"))
+        if (code.Equals("succeeded"))
         {
             Debug.Log("Identified with uid = " + uid);
             onUserIdentified(uid);
@@ -250,7 +215,7 @@ public class VoiceIdentification : MonoBehaviour {
 
     private void HandleEnrollUser(Dictionary<string, string> responseHeaders)
     {
-        Debug.Log("Enrolling at " + responseHeaders["Operation-Location"]);
+        Debug.Log("Enrolled at " + responseHeaders["Operation-Location"]);
     }
 
     private void HandleIdentifyUser(Dictionary<string, string> responseHeaders, Action<string> onUserIdentified)
