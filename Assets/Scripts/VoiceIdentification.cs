@@ -14,8 +14,8 @@ public class VoiceIdentification : MonoBehaviour {
     private static readonly string KEY = "c7c70ee76b594bfd9dc7fa0d016fc462";
 
     void Start () {
-		// DEBUG on start
-	}
+        // DEBUG on start
+    }
 	
 	void Update () {
         // DEBUG on mouse click
@@ -83,12 +83,17 @@ public class VoiceIdentification : MonoBehaviour {
         // Enroll the user with the audio file
         // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c3271984551c84ec6797
 
+        // Convert the byte[] to a WAV file
+        MemoryStream stream = new MemoryStream();
+        WAV.WriteWavHeader(stream, false, 1, 16, 16000, audio.Length);
+        stream.Write(audio, 0, audio.Length);
+
         // Boundary for the multipart/form-data
         string boundary = "Upload----" + DateTime.Now.ToString("u");
 
         // Construct the headers
         WWWForm form = new WWWForm();
-        form.AddBinaryData("Data", audio, "testFile_" + DateTime.Now.ToString("u"));
+        form.AddBinaryData("Data", stream.GetBuffer(), "testFile_" + DateTime.Now.ToString("u"));
         Dictionary<string, string> headers = form.headers;
         headers.Add("Ocp-Apim-Subscription-Key", KEY);
 
@@ -123,13 +128,13 @@ public class VoiceIdentification : MonoBehaviour {
         }
     }
 
-    private IEnumerator EnrollUserRequest(WWW www, Action<string> callback)
+    private IEnumerator EnrollUserRequest(WWW www, Action<Dictionary<string, string>> callback)
     {
         yield return www;
 
         if (www.error == null)
         {
-            callback(www.text);
+            callback(www.responseHeaders);
         }
         else
         {
@@ -145,18 +150,18 @@ public class VoiceIdentification : MonoBehaviour {
     {
         Debug.Log(res);
 
-        // FIXME figure out how to do real json parsing :(
-        string id = res.Substring(34, 35);
+        // FIXME figure out how to do real json parsing
+        string[] split = res.Split('\"');
+        string id = split[3];
         Debug.Log("Created user profile " + id);
 
         // We have a new id for the user profile now... enroll the new user
         EnrollUser(id, audio);
     }
 
-    private void HandleEnrollUser(string response)
+    private void HandleEnrollUser(Dictionary<string, string> response)
     {
-        Debug.Log("Enrolling");
-        Debug.Log(response);
+        Debug.Log("Enrolling at " + response["Operation-Location"]);
 
         // TODO parse xml for the query endpoint
 
