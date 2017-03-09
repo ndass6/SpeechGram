@@ -75,7 +75,7 @@ public class VoiceIdentification : MonoBehaviour {
         StartCoroutine(EnrollUserRequest(www, HandleEnrollUser));
     }
 
-    public void IdentifyRequestAPI(byte[] audio, Action<string> onUserIdentified)
+    private void IdentifyRequestAPI(byte[] audio, Action<string> onUserIdentified)
     {
         // Create a Identification Request
         // https://dev.projectoxford.ai/docs/services/563309b6778daf02acc0a508/operations/5645c523778daf217c292592
@@ -107,7 +107,7 @@ public class VoiceIdentification : MonoBehaviour {
         StartCoroutine(IdentifyUserRequest(www, onUserIdentified, HandleIdentifyUser));
     }
 
-    public IEnumerator QueryForIdentificationAPI(String url, Action<string> onUserIdentified)
+    private IEnumerator QueryForIdentificationAPI(String url, Action<string> onUserIdentified)
     {
         string code = "failed";
         string uid = "";
