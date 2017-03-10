@@ -11,17 +11,22 @@ public class VoiceIdentification : MonoBehaviour {
     public static readonly string PROFILE_ENDPOINT = "https://westus.api.cognitive.microsoft.com/spid/v1.0/identificationProfiles";
     public static readonly string IDENTIFY_ENDPOINT = "https://westus.api.cognitive.microsoft.com/spid/v1.0/identify";
 
-
     // API key
     private static readonly string KEY = "c7c70ee76b594bfd9dc7fa0d016fc462";
 
     // Users ids that is used for the identification request
-    HashSet<string> userIds = new HashSet<string>(); 
+    HashSet<string> userIds = new HashSet<string>();
 
-    public void MakeNewUser(byte[] audio)
+    public VoiceIdentification()
+    {
+        // TODO db initializtion
+        // TODO get userIds and put in set
+    }
+
+    public void MakeNewUser(byte[] audio, string name)
     {
         // Create the user profile
-        CreateProfileAPI(audio);
+        CreateProfileAPI(audio, name);
     }
 
     public void IdentifyUser(byte[] audio, Action<string> onUserIdentified)
@@ -31,7 +36,7 @@ public class VoiceIdentification : MonoBehaviour {
 
     #region API calls
 
-    private void CreateProfileAPI(byte[] audio)
+    private void CreateProfileAPI(byte[] audio, string name)
     {
         // Create the user profile by calling the api
         // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c068e597ed22ec38f42e
@@ -46,7 +51,7 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Call the api endpoint (POST)
         WWW www = new WWW(PROFILE_ENDPOINT, Encoding.ASCII.GetBytes(body.ToCharArray()), headers);
-        StartCoroutine(CreateProfileRequest(www, audio, HandleCreateProfile));
+        StartCoroutine(CreateProfileRequest(www, audio, name, HandleCreateProfile));
     }
 
     private void EnrollUserAPI(string id, byte[] audio)
@@ -145,6 +150,9 @@ public class VoiceIdentification : MonoBehaviour {
         if (code.Equals("succeeded"))
         {
             Debug.Log("Identified with uid = " + uid);
+
+            // TODO find the name from the db
+
             onUserIdentified(uid);
         }
     }
@@ -153,13 +161,13 @@ public class VoiceIdentification : MonoBehaviour {
 
     #region API request coroutine
 
-    private IEnumerator CreateProfileRequest(WWW www, byte[] audio, Action<string, byte[]> callback)
+    private IEnumerator CreateProfileRequest(WWW www, byte[] audio, string name, Action<string, byte[], string> callback)
     {
         yield return www;
 
         if (www.error == null)
         {
-            callback(www.text, audio);
+            callback(www.text, audio, name);
         }
         else
         {
@@ -199,7 +207,7 @@ public class VoiceIdentification : MonoBehaviour {
 
     #region API response handlers
 
-    private void HandleCreateProfile(string res, byte[] audio)
+    private void HandleCreateProfile(string res, byte[] audio, string name)
     {
         Debug.Log(res);
 
@@ -207,7 +215,9 @@ public class VoiceIdentification : MonoBehaviour {
         string[] split = res.Split('\"');
         string id = split[3];
         userIds.Add(id);
-        Debug.Log("Created user profile " + id);
+        Debug.Log("Created user profile " + id + " with name " + name);
+
+        // TODO add user to db
 
         // We have a new id for the user profile now... enroll the new user
         EnrollUserAPI(id, audio);
