@@ -1,6 +1,5 @@
-﻿using HoloToolkit.Unity.SpatialMapping;
-using System;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.VR.WSA.Input;
 
 public class GestureDetector : MonoBehaviour
@@ -8,11 +7,8 @@ public class GestureDetector : MonoBehaviour
     public static GestureDetector Instance;
     public GestureRecognizer GestureRecognizer { get; private set; }
 
-    public TextMesh displayText;
-    public GameObject microphone;
-
-    private AudioSource dictationAudio;
-    private MicrophoneManager microphoneManager;
+    [SerializeField]
+    private HoverMenu hoverMenu;
 
     public void Awake()
     {
@@ -24,12 +20,9 @@ public class GestureDetector : MonoBehaviour
         GestureRecognizer.HoldCompletedEvent += Recognizer_HoldCompletedEvent;
 
         GestureRecognizer.StartCapturingGestures();
-
-        dictationAudio = microphone.GetComponent<AudioSource>();
-        microphoneManager = microphone.GetComponent<MicrophoneManager>();
     }
 
-    void OnDestroy()
+    public void OnDestroy()
     {
         GestureRecognizer.HoldStartedEvent -= Recognizer_HoldStartedEvent;
         GestureRecognizer.HoldCompletedEvent -= Recognizer_HoldCompletedEvent;
@@ -39,13 +32,18 @@ public class GestureDetector : MonoBehaviour
 
     private void Recognizer_HoldStartedEvent(InteractionSourceKind source, Ray headRay)
     {
-        displayText.text = "hold started";
-        dictationAudio.clip = microphoneManager.StartRecording();
+        hoverMenu.OpenMenu();
     }
 
     private void Recognizer_HoldCompletedEvent(InteractionSourceKind source, Ray headRay)
     {
-        displayText.text = "hold ended";
-        microphoneManager.StopRecording();
+        RaycastHit hit;
+        if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit))
+        {
+            Button button = hit.transform.gameObject.GetComponent<Button>();
+            if(button != null)
+                button.onClick.Invoke();
+        }
+        hoverMenu.CloseMenu();
     }
 }
