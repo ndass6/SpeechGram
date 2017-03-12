@@ -8,6 +8,10 @@ using UnityEngine.Windows.Speech;
 public class MicrophoneManager : MonoBehaviour
 {
     public TextMesh displayText;
+    public ChatroomManager chatroomManager;
+
+    [HideInInspector]
+    public bool registeringNewUser = false;
 
     private DictationRecognizer dictationRecognizer;
 
@@ -22,6 +26,8 @@ public class MicrophoneManager : MonoBehaviour
     private AudioSource dictationAudio;
     private bool converted;
     private float[] samples;
+
+    private VoiceIdentification identifier = new VoiceIdentification();
 
     void Awake()
     {
@@ -124,9 +130,18 @@ public class MicrophoneManager : MonoBehaviour
 
         var byteArray = new byte[samples.Length * 4];
         Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
-
-        converted = true;
         displayText.text = "converted";
+
+        if (registeringNewUser)
+        {
+            identifier.MakeNewUser(byteArray, "Person");
+            displayText.text = "made new user";
+        }
+        else
+        {
+            displayText.text = "identified old user";
+            //identifier.IdentifyUser(byteArray);
+        }
     }
 
     // This event is fired when an error occurs.
