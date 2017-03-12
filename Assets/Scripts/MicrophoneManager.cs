@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,7 +7,7 @@ using UnityEngine.Windows.Speech;
 
 public class MicrophoneManager : MonoBehaviour
 {
-    public TextMesh DictationDisplay;
+    public TextMesh displayText;
 
     private DictationRecognizer dictationRecognizer;
 
@@ -16,14 +17,14 @@ public class MicrophoneManager : MonoBehaviour
     // Using an empty string specifies the default microphone. 
     private static string deviceName = string.Empty;
     private int samplingRate;
-    private const int messageLength = 10;
+    private const int messageLength = 120;
 
-    // Use this to reset the UI once the Microphone is done recording after it was started.
-    private bool hasRecordingStarted;
+    private AudioSource dictationAudio;
+    private bool converted;
+    private float[] samples;
 
     void Awake()
     {
-        // Create a new DictationRecognizer and assign it to dictationRecognizer variable.
         dictationRecognizer = new DictationRecognizer();
 
         // Fires while the user is talking. As the recognizer listens, it provides text of what it's heard so far.
@@ -45,19 +46,19 @@ public class MicrophoneManager : MonoBehaviour
         // Use this string to cache the text currently displayed in the text box.
         textSoFar = new StringBuilder();
 
-        // Use this to reset the UI once the Microphone is done recording after it was started.
-        hasRecordingStarted = false;
+        displayText.text = "launched microphone manager";
 
-        DictationDisplay.text = "launched microphone manager";
+        dictationAudio = GetComponent<AudioSource>();
+
+        displayText.text = "StartRecording()";
+        dictationAudio.clip = StartRecording();
     }
 
     // Turns on the dictation recognizer and begins recording audio from the default microphone.
     public AudioClip StartRecording()
     {
-        DictationDisplay.text = "started recording";
         PhraseRecognitionSystem.Shutdown();
         dictationRecognizer.Start();
-        DictationDisplay.text = "started dictation recognizer";
         return Microphone.Start(deviceName, false, messageLength, samplingRate);
     }
 
@@ -68,7 +69,7 @@ public class MicrophoneManager : MonoBehaviour
         {
             dictationRecognizer.Stop();
         }
-
+        displayText.text = "StopRecording()";
         Microphone.End(deviceName);
     }
 
@@ -76,7 +77,7 @@ public class MicrophoneManager : MonoBehaviour
     // text is the currently hypothesized recognition.
     private void DictationRecognizer_DictationHypothesis(string text)
     {
-        DictationDisplay.text = textSoFar.ToString() + " " + text + "...";
+        displayText.text = textSoFar.ToString() + " " + text + "...";
     }
 
     // This event is fired after the user pauses, typically at the end of a sentence. The full recognized string is returned here.
@@ -85,7 +86,7 @@ public class MicrophoneManager : MonoBehaviour
     private void DictationRecognizer_DictationResult(string text, ConfidenceLevel confidence)
     {
         textSoFar.Append(text + ". ");
-        DictationDisplay.text = textSoFar.ToString();
+        displayText.text = textSoFar.ToString();
     }
 
     // This event is fired when the recognizer stops, whether from Stop() being called, a timeout occurring, or some other error.
@@ -100,9 +101,32 @@ public class MicrophoneManager : MonoBehaviour
         {
             Microphone.End(deviceName);
 
-            DictationDisplay.text = "Dictation has timed out. Please press the record button again.";
-            SendMessage("ResetAfterTimeout");
+            displayText.text = "Dictation has timed out. Please press the record button again.";
         }
+
+        ConvertAudioClip();
+
+        dictationAudio.clip = StartRecording();
+    }
+
+    private void ConvertAudioClip()
+    {
+        // Convert AudioSource into byte array
+        samples = new float[dictationAudio.clip.samples * dictationAudio.clip.channels];
+        dictationAudio.clip.GetData(samples, 0);
+        int i = 0;
+        while (i < samples.Length)
+        {
+            samples[i] = samples[i] * 0.5F;
+            ++i;
+        }
+        dictationAudio.clip.SetData(samples, 0);
+
+        var byteArray = new byte[samples.Length * 4];
+        Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
+
+        converted = true;
+        displayText.text = "converted";
     }
 
     // This event is fired when an error occurs.
@@ -110,6 +134,6 @@ public class MicrophoneManager : MonoBehaviour
     // hresult is the int representation of the hresult.</param>
     private void DictationRecognizer_DictationError(string error, int hresult)
     {
-        DictationDisplay.text = error + "\nHRESULT: " + hresult;
+        displayText.text = error + "\nHRESULT: " + hresult;
     }
 }

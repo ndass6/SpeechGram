@@ -1,4 +1,5 @@
 ﻿using HoloToolkit.Unity.SpatialMapping;
+using System;
 using UnityEngine;
 using UnityEngine.VR.WSA.Input;
 
@@ -6,7 +7,9 @@ public class GestureDetector : MonoBehaviour
 {
     public static GestureDetector Instance;
     public GestureRecognizer GestureRecognizer { get; private set; }
-    public TextMesh text;
+
+    public TextMesh displayText;
+    public GameObject microphone;
 
     private AudioSource dictationAudio;
     private MicrophoneManager microphoneManager;
@@ -22,8 +25,8 @@ public class GestureDetector : MonoBehaviour
 
         GestureRecognizer.StartCapturingGestures();
 
-        dictationAudio = gameObject.GetComponent<AudioSource>();
-        microphoneManager = GetComponent<MicrophoneManager>();
+        dictationAudio = microphone.GetComponent<AudioSource>();
+        microphoneManager = microphone.GetComponent<MicrophoneManager>();
     }
 
     void OnDestroy()
@@ -36,13 +39,13 @@ public class GestureDetector : MonoBehaviour
 
     private void Recognizer_HoldStartedEvent(InteractionSourceKind source, Ray headRay)
     {
-        text.text = "hold started";
+        displayText.text = "hold started";
         dictationAudio.clip = microphoneManager.StartRecording();
     }
 
     private void Recognizer_HoldCompletedEvent(InteractionSourceKind source, Ray headRay)
     {
-        text.text = "hold ended";
+        displayText.text = "hold ended";
         microphoneManager.StopRecording();
     }
 }
