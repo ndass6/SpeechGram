@@ -6,50 +6,101 @@ using System;
 
 public class WAV
 {
-    public static void WriteWavHeader(MemoryStream stream, bool isFloatingPoint, ushort channelCount, ushort bitDepth, int sampleRate, int totalSampleCount)
+    public static byte[] WriteWavHeader(bool isFloatingPoint, ushort channelCount, ushort bitDepth, int sampleRate, int totalSampleCount)
     {
-        stream.Position = 0;
+        byte[] buffer = new byte[44];
 
         // RIFF header.
         // Chunk ID.
-        stream.Write(Encoding.ASCII.GetBytes("RIFF"), 0, 4);
+        buffer[0] = Encoding.ASCII.GetBytes("R")[0];
+        buffer[1] = Encoding.ASCII.GetBytes("I")[0];
+        buffer[2] = Encoding.ASCII.GetBytes("F")[0];
+        buffer[3] = Encoding.ASCII.GetBytes("F")[0];
 
         // Chunk size.
-        stream.Write(BitConverter.GetBytes(((bitDepth / 8) * totalSampleCount) + 36), 0, 4);
+        byte[] temp = BitConverter.GetBytes(((bitDepth / 8) * totalSampleCount) + 36);
+        for (int i = 0; i < 4; i++)
+        {
+            buffer[4 + i] = temp[i];
+        }
 
         // Format.
-        stream.Write(Encoding.ASCII.GetBytes("WAVE"), 0, 4);
+        buffer[8] = Encoding.ASCII.GetBytes("W")[0];
+        buffer[9] = Encoding.ASCII.GetBytes("A")[0];
+        buffer[10] = Encoding.ASCII.GetBytes("V")[0];
+        buffer[11] = Encoding.ASCII.GetBytes("E")[0];
 
         // Sub-chunk 1.
         // Sub-chunk 1 ID.
-        stream.Write(Encoding.ASCII.GetBytes("fmt "), 0, 4);
+        buffer[12] = Encoding.ASCII.GetBytes("f")[0];
+        buffer[13] = Encoding.ASCII.GetBytes("m")[0];
+        buffer[14] = Encoding.ASCII.GetBytes("t")[0];
+        buffer[15] = Encoding.ASCII.GetBytes(" ")[0];
 
         // Sub-chunk 1 size.
-        stream.Write(BitConverter.GetBytes(16), 0, 4);
+        temp = BitConverter.GetBytes(16);
+        for (int i = 0; i < 4; i++)
+        {
+            buffer[16 + i] = temp[i];
+        }
 
         // Audio format (floating point (3) or PCM (1)). Any other format indicates compression.
-        stream.Write(BitConverter.GetBytes((ushort)(isFloatingPoint ? 3 : 1)), 0, 2);
+        temp = BitConverter.GetBytes((ushort)(isFloatingPoint ? 3 : 1));
+        for (int i = 0; i < 2; i++)
+        {
+            buffer[20 + i] = temp[i];
+        }
 
         // Channels.
-        stream.Write(BitConverter.GetBytes(channelCount), 0, 2);
+        temp = BitConverter.GetBytes(channelCount);
+        for (int i = 0; i < 2; i++)
+        {
+            buffer[22 + i] = temp[i];
+        }
 
         // Sample rate.
-        stream.Write(BitConverter.GetBytes(sampleRate), 0, 4);
+        temp = BitConverter.GetBytes(sampleRate);
+        for (int i = 0; i < 4; i++)
+        {
+            buffer[24 + i] = temp[i];
+        }
 
         // Bytes rate.
-        stream.Write(BitConverter.GetBytes(sampleRate * channelCount * (bitDepth / 8)), 0, 4);
+        temp = BitConverter.GetBytes(sampleRate * channelCount * (bitDepth / 8));
+        for (int i = 0; i < 4; i++)
+        {
+            buffer[28 + i] = temp[i];
+        }
 
         // Block align.
-        stream.Write(BitConverter.GetBytes((ushort)channelCount * (bitDepth / 8)), 0, 2);
+        temp = BitConverter.GetBytes((ushort)channelCount * (bitDepth / 8));
+        for (int i = 0; i < 2; i++)
+        {
+            buffer[32 + i] = temp[i];
+        }
 
         // Bits per sample.
-        stream.Write(BitConverter.GetBytes(bitDepth), 0, 2);
+        temp = BitConverter.GetBytes(bitDepth);
+        for (int i = 0; i < 2; i++)
+        {
+            buffer[34 + i] = temp[i];
+        }
 
         // Sub-chunk 2.
         // Sub-chunk 2 ID.
-        stream.Write(Encoding.ASCII.GetBytes("data"), 0, 4);
+        temp = Encoding.ASCII.GetBytes("data");
+        for (int i = 0; i < 4; i++)
+        {
+            buffer[36 + i] = temp[i];
+        }
 
         // Sub-chunk 2 size.
-        stream.Write(BitConverter.GetBytes((bitDepth / 8) * totalSampleCount), 0, 4);
+        temp = BitConverter.GetBytes((bitDepth / 8) * totalSampleCount);
+        for (int i = 0; i < 4; i++)
+        {
+            buffer[40 + i] = temp[i];
+        }
+
+        return buffer;
     }
 }

@@ -59,13 +59,20 @@ public class VoiceIdentification : MonoBehaviour {
         // https://westus.dev.cognitive.microsoft.com/docs/services/563309b6778daf02acc0a508/operations/5645c3271984551c84ec6797
 
         // Convert the byte[] to a WAV file
-        MemoryStream stream = new MemoryStream();
-        WAV.WriteWavHeader(stream, false, 1, 16, 16000, audio.Length);
-        stream.Write(audio, 0, audio.Length);
+        byte[] header = WAV.WriteWavHeader(false, 1, 16, 16000, audio.Length);
+        byte[] all = new byte[header.Length + audio.Length];
+        for (int i = 0; i < header.Length; i++)
+        {
+            all[i] = header[i];
+        }
+        for (int i = 0; i < audio.Length; i++)
+        {
+            all[i + header.Length] = audio[i];
+        }
 
         // Construct the headers
         WWWForm form = new WWWForm();
-        form.AddBinaryData("Data", stream.GetBuffer(), "testFile_" + DateTime.Now.ToString("u"));
+        form.AddBinaryData("Data", all, "testFile_" + DateTime.Now.ToString("u"));
         Dictionary<string, string> headers = form.headers;
         headers.Add("Ocp-Apim-Subscription-Key", KEY);
 
@@ -85,13 +92,20 @@ public class VoiceIdentification : MonoBehaviour {
         // https://dev.projectoxford.ai/docs/services/563309b6778daf02acc0a508/operations/5645c523778daf217c292592
 
         // Convert the byte[] to a WAV file
-        MemoryStream stream = new MemoryStream();
-        WAV.WriteWavHeader(stream, false, 1, 16, 16000, audio.Length);
-        stream.Write(audio, 0, audio.Length);
+        byte[] header = WAV.WriteWavHeader(false, 1, 16, 16000, audio.Length);
+        byte[] all = new byte[header.Length + audio.Length];
+        for (int i = 0; i < header.Length; i++)
+        {
+            all[i] = header[i];
+        }
+        for (int i = 0; i < audio.Length; i++)
+        {
+            all[i + header.Length] = audio[i];
+        }
 
         // Construct the headers
         WWWForm form = new WWWForm();
-        form.AddBinaryData("Data", stream.GetBuffer(), "testFile_" + DateTime.Now.ToString("u"));
+        form.AddBinaryData("Data", all, "testFile_" + DateTime.Now.ToString("u"));
         Dictionary<string, string> headers = form.headers;
         headers.Add("Ocp-Apim-Subscription-Key", KEY);
 
