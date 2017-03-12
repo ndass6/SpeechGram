@@ -484,7 +484,7 @@ PlayerSettings:
   vrEditorSettings: {}
   cloudServicesEnabled:
     UNet: 1
-  cloudProjectId: 
-  projectName: 
-  organizationId: 
+  cloudProjectId: 80a5055c-7b39-466f-b55e-6738bcc4a149
+  projectName: Speechgram (3)
+  organizationId: nathan-dass
   cloudEnabled: 0
