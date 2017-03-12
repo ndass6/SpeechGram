@@ -22,6 +22,38 @@ public class VoiceIdentification : MonoBehaviour {
         StartCoroutine(GetAllUsersFromDB());
     }
 
+    /*
+    void Update()
+    {
+        // DEBUG on mouse click
+        if (Input.GetMouseButtonDown(0))
+        {
+            AudioSource source = GetComponent<AudioSource>();
+
+            float[] samples = new float[source.clip.samples * source.clip.channels];
+            source.clip.GetData(samples, 0);
+            int i = 0;
+            while (i < samples.Length)
+            {
+                samples[i] = samples[i] * 0.5F;
+                ++i;
+            }
+            source.clip.SetData(samples, 0);
+
+            var byteArray = new byte[samples.Length * 4];
+            Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
+
+            //MakeNewUser(byteArray, "BinomialTest1");
+            IdentifyUser(byteArray, Test);
+        }
+    }
+    */
+
+    public void Test(string name)
+    {
+        Debug.Log("User identified!" + name);
+    }
+
     public void MakeNewUser(byte[] audio, string name)
     {
         // Create the user profile
@@ -196,10 +228,12 @@ public class VoiceIdentification : MonoBehaviour {
     private IEnumerator AddUserToDB(string uid, string name)
     {
         String url = "http://soundgram-server.azurewebsites.net/usersAdd?uid=" + uid + "&name=" + name;
+        Debug.Log("Adding to db with url " + url);
 
         // Call the api endpoint (GET)
         WWW www = new WWW(url);
         yield return www;
+        Debug.Log(www.text);
 
         Debug.Log("Added new user to db! " + uid + " = " + name);
     }
