@@ -15,12 +15,11 @@ public class VoiceIdentification : MonoBehaviour {
     private static readonly string KEY = "c7c70ee76b594bfd9dc7fa0d016fc462";
 
     // Users ids that is used for the identification request
-    HashSet<string> userIds = new HashSet<string>();
+    Dictionary<string, string> userIds = new Dictionary<string, string>();
 
-    public VoiceIdentification()
+    public void Start()
     {
-        // TODO db initializtion
-        // TODO get userIds and put in set
+        StartCoroutine(GetAllUsersFromDB());
     }
 
     public void MakeNewUser(byte[] audio, string name)
@@ -99,7 +98,7 @@ public class VoiceIdentification : MonoBehaviour {
         // Set the request parameters in the url
         // FIXME determine short audio based on length of sound file
         string url = IDENTIFY_ENDPOINT + "?identificationProfileIds=";
-        foreach (string uid in userIds)
+        foreach (string uid in userIds.Keys)
         {
             url += uid + ",";
         }
@@ -112,7 +111,7 @@ public class VoiceIdentification : MonoBehaviour {
         StartCoroutine(IdentifyUserRequest(www, onUserIdentified, HandleIdentifyUser));
     }
 
-    private IEnumerator QueryForIdentificationAPI(String url, Action<string> onUserIdentified)
+    private IEnumerator QueryForIdentificationAPI(string url, Action<string> onUserIdentified)
     {
         string code = "failed";
         string uid = "";
@@ -151,10 +150,44 @@ public class VoiceIdentification : MonoBehaviour {
         {
             Debug.Log("Identified with uid = " + uid);
 
-            // TODO find the name from the db
+            // Find the name from the db
+            string name = userIds[uid];
 
-            onUserIdentified(uid);
+            onUserIdentified(name);
         }
+    }
+
+    private IEnumerator GetAllUsersFromDB()
+    {
+        // Call the api endpoint (GET)
+        WWW www = new WWW("http://soundgram-server.azurewebsites.net/users");
+        yield return www;
+
+        // Get the users
+        string res = www.text;
+        Debug.Log(www.text);
+        string[] split = res.Split('{');
+
+        for (int i = 1; i < split.Length; i++)
+        {
+            string user = split[i];
+            string[] split2 = user.Split('\"');
+            string uid = split2[3];
+            string name = split2[7];
+            userIds[uid] = name;
+            Debug.Log("Users added: " + uid + " = " + name);
+        }
+    }
+
+    private IEnumerator AddUserToDB(string uid, string name)
+    {
+        String url = "http://soundgram-server.azurewebsites.net/usersAdd?uid=" + uid + "&name=" + name;
+
+        // Call the api endpoint (GET)
+        WWW www = new WWW(url);
+        yield return www;
+
+        Debug.Log("Added new user to db! " + uid + " = " + name);
     }
 
     #endregion
@@ -214,10 +247,11 @@ public class VoiceIdentification : MonoBehaviour {
         // FIXME figure out how to do real json parsing
         string[] split = res.Split('\"');
         string id = split[3];
-        userIds.Add(id);
+        userIds[id] = name;
         Debug.Log("Created user profile " + id + " with name " + name);
 
-        // TODO add user to db
+        // Add user to db
+        StartCoroutine(AddUserToDB(id, name));
 
         // We have a new id for the user profile now... enroll the new user
         EnrollUserAPI(id, audio);
