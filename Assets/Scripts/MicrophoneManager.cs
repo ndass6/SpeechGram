@@ -9,6 +9,7 @@ public class MicrophoneManager : MonoBehaviour
 {
     public TextMesh displayText;
     public ChatroomManager chatroomManager;
+    public VoiceIdentification identifier;
 
     [HideInInspector]
     public bool registeringNewUser = false;
@@ -27,11 +28,11 @@ public class MicrophoneManager : MonoBehaviour
     private bool converted;
     private float[] samples;
 
-    private VoiceIdentification identifier = new VoiceIdentification();
-
     void Awake()
     {
         dictationRecognizer = new DictationRecognizer();
+        dictationRecognizer.AutoSilenceTimeoutSeconds = 3;
+        dictationRecognizer.InitialSilenceTimeoutSeconds = 5;
 
         // Fires while the user is talking. As the recognizer listens, it provides text of what it's heard so far.
         dictationRecognizer.DictationHypothesis += DictationRecognizer_DictationHypothesis;
@@ -110,6 +111,9 @@ public class MicrophoneManager : MonoBehaviour
             displayText.text = "Dictation has timed out. Please press the record button again.";
         }
 
+        textSoFar = new StringBuilder();
+        displayText.text = textSoFar.ToString();
+
         ConvertAudioClip();
 
         dictationAudio.clip = StartRecording();
@@ -134,13 +138,14 @@ public class MicrophoneManager : MonoBehaviour
 
         if (registeringNewUser)
         {
-            identifier.MakeNewUser(byteArray, "Person");
+            //identifier.MakeNewUser(byteArray, "Person");
             displayText.text = "made new user";
         }
         else
         {
             displayText.text = "identified old user";
             //identifier.IdentifyUser(byteArray);
+            //chatroomManager.AddMessage();
         }
     }
 
