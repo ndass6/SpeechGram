@@ -16,6 +16,7 @@ public class VoiceIdentification : MonoBehaviour {
 
     // Users ids that is used for the identification request
     Dictionary<string, string> userIds = new Dictionary<string, string>();
+    bool downloaded = false;
 
     public void Start()
     {
@@ -43,12 +44,12 @@ public class VoiceIdentification : MonoBehaviour {
             var byteArray = new byte[samples.Length * 4];
             Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
 
-            //MakeNewUser(byteArray, "BinomialTest1");
+            // MakeNewUser(byteArray, "BinomialTest1");
             IdentifyUser(byteArray, Test);
         }
     }
     */
-
+    
     public void Test(string name)
     {
         Debug.Log("User identified!" + name);
@@ -56,6 +57,9 @@ public class VoiceIdentification : MonoBehaviour {
 
     public void MakeNewUser(byte[] audio, string name)
     {
+        // Remove spaces
+        name.Replace(" ", "");
+
         // Create the user profile
         CreateProfileAPI(audio, name);
     }
@@ -159,6 +163,8 @@ public class VoiceIdentification : MonoBehaviour {
 
     private IEnumerator QueryForIdentificationAPI(string url, Action<string> onUserIdentified)
     {
+        yield return new WaitUntil(() => downloaded);
+
         string code = "failed";
         string uid = "";
         bool done = false;
@@ -223,10 +229,14 @@ public class VoiceIdentification : MonoBehaviour {
             userIds[uid] = name;
             Debug.Log("Users added: " + uid + " = " + name);
         }
+
+        downloaded = true;
     }
 
     private IEnumerator AddUserToDB(string uid, string name)
     {
+        yield return new WaitUntil(() => downloaded);
+
         String url = "http://soundgram-server.azurewebsites.net/usersAdd?uid=" + uid + "&name=" + name;
         Debug.Log("Adding to db with url " + url);
 
@@ -244,6 +254,8 @@ public class VoiceIdentification : MonoBehaviour {
 
     private IEnumerator CreateProfileRequest(WWW www, byte[] audio, string name, Action<string, byte[], string> callback)
     {
+        yield return new WaitUntil(() => downloaded);
+
         yield return www;
 
         if (www.error == null)
@@ -258,6 +270,8 @@ public class VoiceIdentification : MonoBehaviour {
 
     private IEnumerator EnrollUserRequest(WWW www, Action<Dictionary<string, string>> callback)
     {
+        yield return new WaitUntil(() => downloaded);
+
         yield return www;
 
         if (www.error == null)
@@ -272,6 +286,8 @@ public class VoiceIdentification : MonoBehaviour {
 
     private IEnumerator IdentifyUserRequest(WWW www, Action<string> onUserIdentified, Action<Dictionary<string, string>, Action<string>> callback)
     {
+        yield return new WaitUntil(() => downloaded);
+
         yield return www;
 
         if (www.error == null)
