@@ -7,7 +7,6 @@ using UnityEngine.Windows.Speech;
 
 public class MicrophoneManager : MonoBehaviour
 {
-    public TextMesh displayText;
     public ChatroomManager chatroomManager;
     public VoiceIdentification identifier;
 
@@ -30,7 +29,7 @@ public class MicrophoneManager : MonoBehaviour
 
     private static int personCounter = 0;
 
-    void Awake()
+    public void Start()
     {
         dictationRecognizer = new DictationRecognizer();
         dictationRecognizer.AutoSilenceTimeoutSeconds = 3;
@@ -55,11 +54,8 @@ public class MicrophoneManager : MonoBehaviour
         // Use this string to cache the text currently displayed in the text box.
         textSoFar = new StringBuilder();
 
-        displayText.text = "launched microphone manager";
-
         dictationAudio = GetComponent<AudioSource>();
-
-        displayText.text = "StartRecording()";
+        
         dictationAudio.clip = StartRecording();
     }
 
@@ -78,16 +74,12 @@ public class MicrophoneManager : MonoBehaviour
         {
             dictationRecognizer.Stop();
         }
-        displayText.text = "StopRecording()";
         Microphone.End(deviceName);
     }
 
     // This event is fired while the user is talking. As the recognizer listens, it provides text of what it's heard so far.
     // text is the currently hypothesized recognition.
-    private void DictationRecognizer_DictationHypothesis(string text)
-    {
-        displayText.text = textSoFar.ToString() + " " + text + "...";
-    }
+    private void DictationRecognizer_DictationHypothesis(string text) { }
 
     // This event is fired after the user pauses, typically at the end of a sentence. The full recognized string is returned here.
     // text is what was heard by the recognizer.
@@ -95,7 +87,6 @@ public class MicrophoneManager : MonoBehaviour
     private void DictationRecognizer_DictationResult(string text, ConfidenceLevel confidence)
     {
         textSoFar.Append(text + ". ");
-        displayText.text = textSoFar.ToString();
     }
 
     // This event is fired when the recognizer stops, whether from Stop() being called, a timeout occurring, or some other error.
@@ -109,14 +100,11 @@ public class MicrophoneManager : MonoBehaviour
         if (cause == DictationCompletionCause.TimeoutExceeded)
         {
             Microphone.End(deviceName);
-
-            displayText.text = "Dictation has timed out. Please press the record button again.";
         }
 
         ConvertAudioClip(textSoFar.ToString());
 
         textSoFar = new StringBuilder();
-        displayText.text = textSoFar.ToString();
 
         dictationAudio.clip = StartRecording();
     }
@@ -136,18 +124,15 @@ public class MicrophoneManager : MonoBehaviour
 
         var byteArray = new byte[samples.Length * 4];
         Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
-        displayText.text = "converted";
 
         if (registeringNewUser)
         {
             personCounter++;
             identifier.MakeNewUser(byteArray, "Person" + personCounter);
             registeringNewUser = false;
-            displayText.text = "made new user";
         }
         else
         {
-            displayText.text = "identified old user";
             identifier.IdentifyUser(byteArray, text, ProcessUserIdentification);
         }
     }
@@ -155,10 +140,7 @@ public class MicrophoneManager : MonoBehaviour
     // This event is fired when an error occurs.
     // error is the string representation of the error reason.</param>
     // hresult is the int representation of the hresult.</param>
-    private void DictationRecognizer_DictationError(string error, int hresult)
-    {
-        displayText.text = error + "\nHRESULT: " + hresult;
-    }
+    private void DictationRecognizer_DictationError(string error, int hresult) { }
 
     private void ProcessUserIdentification(string name, string text)
     {

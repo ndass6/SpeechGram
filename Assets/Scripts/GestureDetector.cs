@@ -10,7 +10,7 @@ public class GestureDetector : MonoBehaviour
     [SerializeField]
     private HoverMenu hoverMenu;
 
-    public void Awake()
+    public void Start()
     {
         Instance = this;
 

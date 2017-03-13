@@ -23,6 +23,7 @@ public class VoiceIdentification : MonoBehaviour {
         StartCoroutine(GetAllUsersFromDB());
     }
 
+    /*
     void Update()
     {
         // DEBUG on mouse click
@@ -52,6 +53,7 @@ public class VoiceIdentification : MonoBehaviour {
     {
         Debug.Log(name + ": " + text);
     }
+    */
 
     public void MakeNewUser(byte[] audio, string name)
     {

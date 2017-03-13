@@ -1,6 +1,5 @@
 ﻿using HoloToolkit.Unity;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class HoverMenu : MonoBehaviour
 {
@@ -23,9 +22,11 @@ public class HoverMenu : MonoBehaviour
             RaycastHit hit;
             if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit))
             {
-                Button button = hit.transform.gameObject.GetComponent<Button>();
+                ReplyButton button = hit.transform.gameObject.GetComponent<ReplyButton>();
                 if(button != null)
-                    button.onClick.Invoke();
+                {
+                    EmitReply(button.Message);
+                }
             }
         }
         else
@@ -33,8 +34,7 @@ public class HoverMenu : MonoBehaviour
             // Set menu position to directly in front of user
             transform.position = Camera.main.transform.position + Camera.main.transform.forward * 5;
         }
-
-
+        
         gameObject.SetActive(!gameObject.activeSelf);
         Chatroom.gameObject.SetActive(!gameObject.activeSelf);
     }
