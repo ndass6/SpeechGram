@@ -128,8 +128,10 @@ public class MicrophoneManager : MonoBehaviour
         if (registeringNewUser)
         {
             personCounter++;
-            identifier.MakeNewUser(byteArray, "Person" + personCounter);
+            string name = "Person" + personCounter;
+            identifier.MakeNewUser(byteArray, name, text);
             registeringNewUser = false;
+            ProcessUserIdentification(name, text);
         }
         else
         {

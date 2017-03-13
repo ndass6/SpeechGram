@@ -55,8 +55,14 @@ public class VoiceIdentification : MonoBehaviour {
     }
     */
 
-    public void MakeNewUser(byte[] audio, string name)
+    public void MakeNewUser(byte[] audio, string name, string text)
     {
+        // Make sure audio is long enough
+        if (text.Length < 50)
+        {
+            return;
+        }
+
         // Remove spaces
         name.Replace(" ", "");
 
@@ -66,6 +72,12 @@ public class VoiceIdentification : MonoBehaviour {
 
     public void IdentifyUser(byte[] audio, string text, Action<string, string> onUserIdentified)
     {
+        // Make sure audio is long enough
+        if (text.Length < 10)
+        {
+            return;
+        }
+
         StartCoroutine(WaitForDownload(audio, text, onUserIdentified));
     }
 
@@ -214,6 +226,10 @@ public class VoiceIdentification : MonoBehaviour {
 
             onUserIdentified(name, text);
         }
+        else
+        {
+            onUserIdentified("Unknown", text);
+        }
     }
 
     private IEnumerator GetAllUsersFromDB()
@@ -293,8 +309,6 @@ public class VoiceIdentification : MonoBehaviour {
 
     private IEnumerator IdentifyUserRequest(WWW www, string text, Action<string, string> onUserIdentified)
     {
-        yield return new WaitUntil(() => downloaded);
-
         yield return www;
 
         if (www.error == null)
