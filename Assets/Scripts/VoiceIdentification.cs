@@ -23,38 +23,6 @@ public class VoiceIdentification : MonoBehaviour {
         StartCoroutine(GetAllUsersFromDB());
     }
 
-    /*
-    void Update()
-    {
-        // DEBUG on mouse click
-        if (Input.GetMouseButtonDown(0))
-        {
-            AudioSource source = GetComponent<AudioSource>();
-
-            float[] samples = new float[source.clip.samples * source.clip.channels];
-            source.clip.GetData(samples, 0);
-            int i = 0;
-            while (i < samples.Length)
-            {
-                samples[i] = samples[i] * 0.5F;
-                ++i;
-            }
-            source.clip.SetData(samples, 0);
-
-            var byteArray = new byte[samples.Length * 4];
-            Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
-
-            // MakeNewUser(byteArray, "BinomialTheoremT1");
-            IdentifyUser(byteArray, "Lol this is text", TestCallback);
-        }
-    }
-    
-    public void TestCallback(string name, string text)
-    {
-        Debug.Log(name + ": " + text);
-    }
-    */
-
     public void MakeNewUser(byte[] audio, string name, string text)
     {
         // Make sure audio is long enough
@@ -182,8 +150,6 @@ public class VoiceIdentification : MonoBehaviour {
 
     private IEnumerator QueryForIdentificationAPI(string url, string text, Action<string, string> onUserIdentified)
     {
-        yield return new WaitUntil(() => downloaded);
-
         string code = "failed";
         string uid = "";
         bool done = false;
@@ -203,6 +169,12 @@ public class VoiceIdentification : MonoBehaviour {
             WWW www = new WWW(url, null, headers);
             yield return www;
 
+            if (www.error != null)
+            {
+                done = true;
+                code = "failed";
+            }
+
             // Check the status
             string res = www.text;
             Debug.Log(www.text);
@@ -210,10 +182,14 @@ public class VoiceIdentification : MonoBehaviour {
 
             // Find the status code in the json
             code = split[3];
-            if (code.Equals("succeeded") || code.Equals("failed"))
+            if (code.Equals("succeeded"))
             {
                 done = true;
                 uid = split[17];
+            }
+            else if (code.Equals("failed"))
+            {
+                done = true;
             }
         }
 
@@ -318,6 +294,7 @@ public class VoiceIdentification : MonoBehaviour {
         else
         {
             Debug.Log("ERROR: " + www.error + "\n" + www.text);
+            onUserIdentified("Unknown", text);
         }
     }
 

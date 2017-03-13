@@ -21,7 +21,7 @@ public class MicrophoneManager : MonoBehaviour
     // Using an empty string specifies the default microphone. 
     private static string deviceName = string.Empty;
     private int samplingRate;
-    private const int messageLength = 120;
+    private const int messageLength = 30;
 
     private AudioSource dictationAudio;
     private bool converted;
@@ -114,16 +114,34 @@ public class MicrophoneManager : MonoBehaviour
         // Convert AudioSource into byte array
         samples = new float[dictationAudio.clip.samples * dictationAudio.clip.channels];
         dictationAudio.clip.GetData(samples, 0);
-        int i = 0;
-        while (i < samples.Length)
+
+        int start = 0;
+        int end = samples.Length;
+        for (int i = 0; i < samples.Length; i++)
+        {
+            if (samples[i] != 0)
+            {
+                start = i;
+                break;
+            }
+        }
+        for (int i = samples.Length - 1; i >= 0; i--)
+        {
+            if (samples[i] != 0)
+            {
+                end = i;
+                break;
+            }
+        }
+
+        for (int i = start; i < end; i++)
         {
             samples[i] = samples[i] * 0.5F;
             ++i;
         }
-        dictationAudio.clip.SetData(samples, 0);
 
-        var byteArray = new byte[samples.Length * 4];
-        Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
+        var byteArray = new byte[(end - start) * 4];
+        Buffer.BlockCopy(samples, start, byteArray, 0, (end - start));
 
         if (registeringNewUser)
         {
