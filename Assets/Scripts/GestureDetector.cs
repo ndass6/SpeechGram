@@ -15,35 +15,21 @@ public class GestureDetector : MonoBehaviour
         Instance = this;
 
         GestureRecognizer = new GestureRecognizer();
-        GestureRecognizer.SetRecognizableGestures(GestureSettings.Hold);
-        GestureRecognizer.HoldStartedEvent += Recognizer_HoldStartedEvent;
-        GestureRecognizer.HoldCompletedEvent += Recognizer_HoldCompletedEvent;
+        GestureRecognizer.SetRecognizableGestures(GestureSettings.Tap);
+        GestureRecognizer.TappedEvent += Recognizer_TappedEvent;
 
         GestureRecognizer.StartCapturingGestures();
     }
 
     public void OnDestroy()
     {
-        GestureRecognizer.HoldStartedEvent -= Recognizer_HoldStartedEvent;
-        GestureRecognizer.HoldCompletedEvent -= Recognizer_HoldCompletedEvent;
+        GestureRecognizer.TappedEvent -= Recognizer_TappedEvent;
 
         GestureRecognizer.StopCapturingGestures();
     }
 
-    private void Recognizer_HoldStartedEvent(InteractionSourceKind source, Ray headRay)
+    private void Recognizer_TappedEvent(InteractionSourceKind source, int tapCount, Ray headRay)
     {
-        hoverMenu.OpenMenu();
-    }
-
-    private void Recognizer_HoldCompletedEvent(InteractionSourceKind source, Ray headRay)
-    {
-        RaycastHit hit;
-        if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit))
-        {
-            Button button = hit.transform.gameObject.GetComponent<Button>();
-            if(button != null)
-                button.onClick.Invoke();
-        }
-        hoverMenu.CloseMenu();
+        hoverMenu.ToggleMenu();
     }
 }
