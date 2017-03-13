@@ -142,6 +142,7 @@ public class MicrophoneManager : MonoBehaviour
         {
             personCounter++;
             identifier.MakeNewUser(byteArray, "Person" + personCounter);
+            registeringNewUser = false;
             displayText.text = "made new user";
         }
         else
