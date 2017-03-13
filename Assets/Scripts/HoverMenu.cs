@@ -3,8 +3,9 @@ using UnityEngine;
 
 public class HoverMenu : MonoBehaviour
 {
-    public ChatroomManager Chatroom;
+    public MicrophoneManager microphone;
     public TextToSpeechManager textSpeech;
+    public ChatroomManager Chatroom;
 
     public void Update()
     {
@@ -22,10 +23,25 @@ public class HoverMenu : MonoBehaviour
             RaycastHit hit;
             if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit))
             {
-                ReplyButton button = hit.transform.gameObject.GetComponent<ReplyButton>();
+                MenuButton button = hit.transform.gameObject.GetComponent<MenuButton>();
                 if(button != null)
                 {
-                    EmitReply(button.Message);
+                    switch(button.Type)
+                    {
+                        case ButtonType.Register:
+                            microphone.registeringNewUser = true;
+                            break;
+                        case ButtonType.Reply:
+                            Chatroom.AddMessage("Me", button.Message);
+                            textSpeech.SpeakText(button.Message);
+                            gameObject.SetActive(false);
+                            Chatroom.gameObject.SetActive(true);
+                            break;
+                        case ButtonType.Close:
+                            gameObject.SetActive(false);
+                            Chatroom.gameObject.SetActive(true);
+                            break;
+                    }
                 }
             }
         }
@@ -33,27 +49,9 @@ public class HoverMenu : MonoBehaviour
         {
             // Set menu position to directly in front of user
             transform.position = Camera.main.transform.position + Camera.main.transform.forward * 5;
+
+            gameObject.SetActive(true);
+            Chatroom.gameObject.SetActive(false);
         }
-        
-        gameObject.SetActive(!gameObject.activeSelf);
-        Chatroom.gameObject.SetActive(!gameObject.activeSelf);
-    }
-
-    public void CloseMenu()
-    {
-        gameObject.SetActive(false);
-        Chatroom.gameObject.SetActive(true);
-    }
-
-    public void RegisterNewSpeaker()
-    {
-        Debug.Log("New speaker");
-        // TODO set to true
-    }
-
-    public void EmitReply(string message)
-    {
-        Chatroom.AddMessage("Me", message);
-        textSpeech.SpeakText(message);
     }
 }

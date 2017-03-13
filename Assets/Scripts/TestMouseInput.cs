@@ -9,7 +9,6 @@ public class TestMouseInput : MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
-            Debug.Log("Test");
             HoverMenu.ToggleMenu();
         }
 
