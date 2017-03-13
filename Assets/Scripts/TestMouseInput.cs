@@ -12,7 +12,7 @@ public class TestMouseInput : MonoBehaviour
             HoverMenu.ToggleMenu();
         }
 
-        if(Input.GetMouseButtonDown(1))
+        if(Input.GetKeyDown(KeyCode.P))
         {
             string text = "Test message: ";
             for(int i = 0; i < Random.Range(0, 20); i++)

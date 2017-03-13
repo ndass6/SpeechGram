@@ -4,9 +4,14 @@ using UnityEngine;
 
 public class HoverMenu : MonoBehaviour
 {
-    public MicrophoneManager microphone;
-    public TextToSpeechManager textSpeech;
+    public MicrophoneManager Microphone;
+    public TextToSpeechManager TextSpeech;
     public ChatroomManager Chatroom;
+
+    public MenuButton BackButton;
+    public MenuButton RegisterButton;
+    public MenuButton CloseButton;
+    public MenuButton[] ReplyButtons = new MenuButton[MenuButton.NUM_BUTTONS];
 
     public void Update()
     {
@@ -25,20 +30,28 @@ public class HoverMenu : MonoBehaviour
             if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit))
             {
                 MenuButton button = hit.transform.gameObject.GetComponent<MenuButton>();
-                if(button != null)
+                if(button != null && button.Active)
                 {
-                    switch(button.Type)
+                    bool close = true;
+                    switch(button.Data.Type)
                     {
                         case ButtonType.Register:
-                            microphone.registeringNewUser = true;
+                            Microphone.registeringNewUser = true;
+                            break;
+                        case ButtonType.Navigation:
+                            StartCoroutine(MenuReplace(button.Data.Destination));
+                            close = false;
                             break;
                         case ButtonType.Reply:
-                            Chatroom.AddMessage("Me", button.Message);
-                            textSpeech.SpeakText(button.Message);
+                            Chatroom.AddMessage("Me", button.Data.Message);
+                            TextSpeech.SpeakText(button.Data.Message);
                             break;
                     }
-                    gameObject.SetActive(false);
-                    Chatroom.gameObject.SetActive(true);
+
+                    if(close)
+                    {
+                        StartCoroutine(MenuDisappear());
+                    }
                 }
             }
         }
@@ -49,23 +62,41 @@ public class HoverMenu : MonoBehaviour
 
             gameObject.SetActive(true);
             Chatroom.gameObject.SetActive(false);
+
+            StartCoroutine(MenuAppear(0));
         }
     }
 
     #region Animation coroutines
 
-    private IEnumerator Appear()
+    private IEnumerator MenuAppear(int menu)
     {
+        BackButton.Appear(new ButtonData(ButtonType.Navigation, "Back", destination: 0));
+        RegisterButton.Appear(new ButtonData(ButtonType.Register, "Register New Speaker"));
+        CloseButton.Appear(new ButtonData(ButtonType.Close, "Close Menu"));
+        for(int i = 0; i < MenuButton.NUM_BUTTONS; i++)
+            ReplyButtons[i].Appear(ButtonData.Buttons[menu, i]);
         yield return null;
     }
 
-    private IEnumerator Disappear()
+    private IEnumerator MenuDisappear()
     {
-        yield return null;
+        BackButton.Disappear();
+        RegisterButton.Disappear();
+        CloseButton.Disappear();
+        for(int i = 0; i < MenuButton.NUM_BUTTONS; i++)
+            ReplyButtons[i].Disappear();
+
+        yield return new WaitForSeconds(1);
+
+        gameObject.SetActive(false);
+        Chatroom.gameObject.SetActive(true);
     }
 
-    private IEnumerator Replace()
+    private IEnumerator MenuReplace(int menu)
     {
+        for(int i = 0; i < MenuButton.NUM_BUTTONS; i++)
+            ReplyButtons[i].Replace(ButtonData.Buttons[menu, i]);
         yield return null;
     }
 
