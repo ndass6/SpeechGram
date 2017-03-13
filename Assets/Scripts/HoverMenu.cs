@@ -34,14 +34,10 @@ public class HoverMenu : MonoBehaviour
                         case ButtonType.Reply:
                             Chatroom.AddMessage("Me", button.Message);
                             textSpeech.SpeakText(button.Message);
-                            gameObject.SetActive(false);
-                            Chatroom.gameObject.SetActive(true);
-                            break;
-                        case ButtonType.Close:
-                            gameObject.SetActive(false);
-                            Chatroom.gameObject.SetActive(true);
                             break;
                     }
+                    gameObject.SetActive(false);
+                    Chatroom.gameObject.SetActive(true);
                 }
             }
         }
