@@ -28,6 +28,8 @@ public class MicrophoneManager : MonoBehaviour
     private bool converted;
     private float[] samples;
 
+    private static int personCounter = 0;
+
     void Awake()
     {
         dictationRecognizer = new DictationRecognizer();
@@ -111,15 +113,15 @@ public class MicrophoneManager : MonoBehaviour
             displayText.text = "Dictation has timed out. Please press the record button again.";
         }
 
+        ConvertAudioClip(textSoFar.ToString());
+
         textSoFar = new StringBuilder();
         displayText.text = textSoFar.ToString();
-
-        ConvertAudioClip();
 
         dictationAudio.clip = StartRecording();
     }
 
-    private void ConvertAudioClip()
+    private void ConvertAudioClip(string text)
     {
         // Convert AudioSource into byte array
         samples = new float[dictationAudio.clip.samples * dictationAudio.clip.channels];
@@ -138,14 +140,15 @@ public class MicrophoneManager : MonoBehaviour
 
         if (registeringNewUser)
         {
-            //identifier.MakeNewUser(byteArray, "Person");
+            personCounter++;
+            identifier.MakeNewUser(byteArray, "Person" + personCounter);
+            registeringNewUser = false;
             displayText.text = "made new user";
         }
         else
         {
             displayText.text = "identified old user";
-            //identifier.IdentifyUser(byteArray);
-            //chatroomManager.AddMessage();
+            identifier.IdentifyUser(byteArray, text, ProcessUserIdentification);
         }
     }
 
@@ -155,5 +158,10 @@ public class MicrophoneManager : MonoBehaviour
     private void DictationRecognizer_DictationError(string error, int hresult)
     {
         displayText.text = error + "\nHRESULT: " + hresult;
+    }
+
+    private void ProcessUserIdentification(string name, string text)
+    {
+        chatroomManager.AddMessage(name, text);
     }
 }

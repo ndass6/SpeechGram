@@ -48,6 +48,7 @@ public class HoverMenu : MonoBehaviour
     public void RegisterNewSpeaker()
     {
         Debug.Log("New speaker");
+        // TODO set to true
     }
 
     public void EmitReply(string message)
