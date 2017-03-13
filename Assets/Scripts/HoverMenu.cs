@@ -1,4 +1,5 @@
 ﻿using HoloToolkit.Unity;
+using System.Collections;
 using UnityEngine;
 
 public class HoverMenu : MonoBehaviour
@@ -50,4 +51,23 @@ public class HoverMenu : MonoBehaviour
             Chatroom.gameObject.SetActive(false);
         }
     }
+
+    #region Animation coroutines
+
+    private IEnumerator Appear()
+    {
+        yield return null;
+    }
+
+    private IEnumerator Disappear()
+    {
+        yield return null;
+    }
+
+    private IEnumerator Replace()
+    {
+        yield return null;
+    }
+
+    #endregion
 }
