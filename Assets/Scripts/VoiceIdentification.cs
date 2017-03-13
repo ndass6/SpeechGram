@@ -23,7 +23,6 @@ public class VoiceIdentification : MonoBehaviour {
         StartCoroutine(GetAllUsersFromDB());
     }
 
-    /*
     void Update()
     {
         // DEBUG on mouse click
@@ -44,15 +43,14 @@ public class VoiceIdentification : MonoBehaviour {
             var byteArray = new byte[samples.Length * 4];
             Buffer.BlockCopy(samples, 0, byteArray, 0, byteArray.Length);
 
-            // MakeNewUser(byteArray, "BinomialTest1");
-            IdentifyUser(byteArray, Test);
+            // MakeNewUser(byteArray, "BinomialTheoremT1");
+            IdentifyUser(byteArray, "Lol this is text", TestCallback);
         }
     }
-    */
     
-    public void Test(string name)
+    public void TestCallback(string name, string text)
     {
-        Debug.Log("User identified!" + name);
+        Debug.Log(name + ": " + text);
     }
 
     public void MakeNewUser(byte[] audio, string name)
@@ -64,9 +62,16 @@ public class VoiceIdentification : MonoBehaviour {
         CreateProfileAPI(audio, name);
     }
 
-    public void IdentifyUser(byte[] audio, Action<string> onUserIdentified)
+    public void IdentifyUser(byte[] audio, string text, Action<string, string> onUserIdentified)
     {
-        IdentifyRequestAPI(audio, onUserIdentified);
+        StartCoroutine(WaitForDownload(audio, text, onUserIdentified));
+    }
+
+    private IEnumerator WaitForDownload(byte[] audio, string text, Action<string, string> onUserIdentified)
+    {
+        yield return new WaitUntil(() => downloaded);
+
+        IdentifyRequestAPI(audio, text, onUserIdentified);
     }
 
     #region API calls
@@ -86,7 +91,7 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Call the api endpoint (POST)
         WWW www = new WWW(PROFILE_ENDPOINT, Encoding.ASCII.GetBytes(body.ToCharArray()), headers);
-        StartCoroutine(CreateProfileRequest(www, audio, name, HandleCreateProfile));
+        StartCoroutine(CreateProfileRequest(www, audio, name));
     }
 
     private void EnrollUserAPI(string id, byte[] audio)
@@ -119,10 +124,10 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Call the api endpoint (POST)
         WWW www = new WWW(url, form.data, headers);
-        StartCoroutine(EnrollUserRequest(www, HandleEnrollUser));
+        StartCoroutine(EnrollUserRequest(www));
     }
 
-    private void IdentifyRequestAPI(byte[] audio, Action<string> onUserIdentified)
+    private void IdentifyRequestAPI(byte[] audio, string text, Action<string, string> onUserIdentified)
     {
         // Create a Identification Request
         // https://dev.projectoxford.ai/docs/services/563309b6778daf02acc0a508/operations/5645c523778daf217c292592
@@ -158,10 +163,10 @@ public class VoiceIdentification : MonoBehaviour {
 
         // Call the api endpoint (POST)
         WWW www = new WWW(url, form.data, headers);
-        StartCoroutine(IdentifyUserRequest(www, onUserIdentified, HandleIdentifyUser));
+        StartCoroutine(IdentifyUserRequest(www, text, onUserIdentified));
     }
 
-    private IEnumerator QueryForIdentificationAPI(string url, Action<string> onUserIdentified)
+    private IEnumerator QueryForIdentificationAPI(string url, string text, Action<string, string> onUserIdentified)
     {
         yield return new WaitUntil(() => downloaded);
 
@@ -205,7 +210,7 @@ public class VoiceIdentification : MonoBehaviour {
             // Find the name from the db
             string name = userIds[uid];
 
-            onUserIdentified(name);
+            onUserIdentified(name, text);
         }
     }
 
@@ -252,7 +257,7 @@ public class VoiceIdentification : MonoBehaviour {
 
     #region API request coroutine
 
-    private IEnumerator CreateProfileRequest(WWW www, byte[] audio, string name, Action<string, byte[], string> callback)
+    private IEnumerator CreateProfileRequest(WWW www, byte[] audio, string name)
     {
         yield return new WaitUntil(() => downloaded);
 
@@ -260,7 +265,7 @@ public class VoiceIdentification : MonoBehaviour {
 
         if (www.error == null)
         {
-            callback(www.text, audio, name);
+            HandleCreateProfile(www.text, audio, name);
         }
         else
         {
@@ -268,7 +273,7 @@ public class VoiceIdentification : MonoBehaviour {
         }
     }
 
-    private IEnumerator EnrollUserRequest(WWW www, Action<Dictionary<string, string>> callback)
+    private IEnumerator EnrollUserRequest(WWW www)
     {
         yield return new WaitUntil(() => downloaded);
 
@@ -276,7 +281,7 @@ public class VoiceIdentification : MonoBehaviour {
 
         if (www.error == null)
         {
-            callback(www.responseHeaders);
+            HandleEnrollUser(www.responseHeaders);
         }
         else
         {
@@ -284,7 +289,7 @@ public class VoiceIdentification : MonoBehaviour {
         }
     }
 
-    private IEnumerator IdentifyUserRequest(WWW www, Action<string> onUserIdentified, Action<Dictionary<string, string>, Action<string>> callback)
+    private IEnumerator IdentifyUserRequest(WWW www, string text, Action<string, string> onUserIdentified)
     {
         yield return new WaitUntil(() => downloaded);
 
@@ -292,7 +297,7 @@ public class VoiceIdentification : MonoBehaviour {
 
         if (www.error == null)
         {
-            callback(www.responseHeaders, onUserIdentified);
+            HandleIdentifyUser(www.responseHeaders, text, onUserIdentified);
         }
         else
         {
@@ -326,12 +331,12 @@ public class VoiceIdentification : MonoBehaviour {
         Debug.Log("Enrolled at " + responseHeaders["Operation-Location"]);
     }
 
-    private void HandleIdentifyUser(Dictionary<string, string> responseHeaders, Action<string> onUserIdentified)
+    private void HandleIdentifyUser(Dictionary<string, string> responseHeaders, string text, Action<string, string> onUserIdentified)
     {
         string url = responseHeaders["Operation-Location"];
         Debug.Log("Identifying at " + url);
 
-        StartCoroutine(QueryForIdentificationAPI(url, onUserIdentified));
+        StartCoroutine(QueryForIdentificationAPI(url, text, onUserIdentified));
     }
 
     #endregion
