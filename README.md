@@ -15,7 +15,7 @@ This application was developed in a 3-week timeframe for the 2017's Microsoft Im
 3. Install **[Unity 5.5.1f1](https://unity3d.com/get-unity/download/archive)**
 
 ### Run the App from the Build Folder
-1. Download the latest build release of this app ([found here](https://github.com/ndass6/Speechgram/releases)
+1. Download the latest build release of this app [found here](https://github.com/ndass6/Speechgram/releases)
 2. Extract the zip to an empty folder
 3. Open up the solution file (`Speechgram.sln` in the `Build` folder) in Microsoft Visual Studio
 4. Connect the HoloLens to your computer. Make sure your laptop is authorized to access your device (you might be prompted to enter a pin on your computer, follow the instructions on the pop-up display)
