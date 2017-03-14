@@ -13,21 +13,33 @@ This application was developed in a 3-week timeframe for the 2017's Microsoft Im
 1. Install **[Visual Studio 2015 Update 3](https://www.visualstudio.com/downloads/)**
 2. Ensure that **Tools** and **Windows 10 SDK** is selected when installing Visual Studio
 3. Install **[Unity 5.5.1f1](https://unity3d.com/get-unity/download/archive)**
-4. Download the latest release of this code ([found here](https://github.com/ndass6/Speechgram/releases))
-5. Create a folder named `Build`
-6. Open up the project in Unity
-7. Click on `File -> Build & Run`
-8. Configure the following build settings:
+
+### Run the App from the Build Folder
+1. Download the latest build release of this app ([found here](https://github.com/ndass6/Speechgram/releases)
+2. Extract the zip to an empty folder
+3. Open up the solution file (`Speechgram.sln` in the `Build` folder) in Microsoft Visual Studio
+4. Connect the HoloLens to your computer. Make sure your laptop is authorized to access your device (you might be prompted to enter a pin on your computer, follow the instructions on the pop-up display)
+5. Select `Release, x86, Device` for the three dropdowns in the top to deploy to the Microsoft Hololens
+
+![Alt text](Deploy.png?raw=true "Title")
+
+### Build source code
+
+1. Clone this repo to an empty folder
+2. Create a folder named `Build`
+3. Open up the project in Unity
+4. Click on `File -> Build & Run`
+5. Configure the following build settings:
    * SDK = Windows 10
    * Target Device = HoloLens
    * UWP Build Type = D3D
    * Build and Run on = Local Machine 
    * Check Copy References
    * Check Unity C# Projects
-9. Click `Build and Run`
-10. Open up the solution file (`Build/Speechgram.sln`) in Microsoft Visual Studio
-11. Connect the HoloLens to your computer. Make sure your laptop is authorized to access your device (you might be prompted to enter a pin on your computer, follow the instructions on the pop-up display)
-12. Select `Release, x86, Device` for the three dropdowns in the top to deploy to the Microsoft Hololens
+6. Click `Build and Run`
+7. Follow the instructions above in the `Run the App from the Build File` from step 3
+
+![Alt text](Build Settings.png?raw=true "Title")
 
 If the build fails, make sure to follow the messages in the console to fix the issues. Otherwise, just try building again :)
 
