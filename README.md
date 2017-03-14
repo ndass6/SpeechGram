@@ -29,6 +29,8 @@ This application was developed in a 3-week timeframe for the 2017's Microsoft Im
 11. Connect the HoloLens to your computer. Make sure your laptop is authorized to access your device. 
 12. Select `Release, x86, Device` to deploy to the Microsoft Hololens
 
+If the build fails, make sure to follow the messages in the console to fix the issues. Otherwise, just try building again :)
+
 If the above instructions do not make sense:
 * [Here](https://developer.microsoft.com/en-us/windows/holographic/install_the_tools) are general instructions on how to install the tools.
 * [Here](https://developer.microsoft.com/en-us/windows/holographic/holograms_100) are general instructions on how to build and run the project.
