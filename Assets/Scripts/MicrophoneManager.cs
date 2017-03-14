@@ -32,8 +32,8 @@ public class MicrophoneManager : MonoBehaviour
     public void Start()
     {
         dictationRecognizer = new DictationRecognizer();
-        dictationRecognizer.AutoSilenceTimeoutSeconds = 2;
-        dictationRecognizer.InitialSilenceTimeoutSeconds = 30;
+        dictationRecognizer.AutoSilenceTimeoutSeconds = 3;
+        dictationRecognizer.InitialSilenceTimeoutSeconds = 5;
 
         // Fires while the user is talking. As the recognizer listens, it provides text of what it's heard so far.
         dictationRecognizer.DictationHypothesis += DictationRecognizer_DictationHypothesis;
