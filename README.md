@@ -3,8 +3,8 @@
 A Microsoft Hololens application that aids users with hearing disabilities have conversations in everyday life. Using Microsoft Azure and the Hololens, our app performs three main functions:
 
 * Translates conversation speech into text, which is displayed to the disabled user
-* Allows the disabled user select a response, which is automatically sent back in speech
-* Identifies a single speaker out of a group and tags each chat message with the speaker's name
+* Allows the disabled user select one of many pre-defined responses, which is automatically spoken out loud
+* Identifies a single speaker (in a group of speakers) and tags each chat message with the speaker's name
 
 This application was developed in a 3-week timeframe for the 2017's Microsoft Imagine Cup.
 
