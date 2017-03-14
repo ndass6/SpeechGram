@@ -7,6 +7,9 @@ public class MenuButton : MonoBehaviour
 
     public ButtonData Data;
     public bool Active;
+    
+    public Sprite WindowGreen;
+    public Sprite WindowBlue;
 
     private Image image;
     private Text text;
@@ -67,10 +70,19 @@ public class MenuButton : MonoBehaviour
                 text.text = Data.Text;
                 targetTextAlpha = 1;
                 replacing = false;
+
+                if(Data.Type == ButtonType.Navigation)
+                    image.sprite = WindowBlue;
+                else if(Data.Type == ButtonType.Reply)
+                    image.sprite = WindowGreen;
             }
         }
     }
 
+    /// <summary>
+    /// Causes button to appear gradually
+    /// </summary>
+    /// <param name="data">Data to be shown on the button</param>
     public void Appear(ButtonData data)
     {
         Data = data;
@@ -83,8 +95,17 @@ public class MenuButton : MonoBehaviour
         image.color = new Color(1, 1, 1, 0);
         text.color = new Color(1, 1, 1, 0);
         text.text = data.Text;
+
+        if(Data.Type == ButtonType.Navigation)
+            image.sprite = WindowBlue;
+        else if(Data.Type == ButtonType.Reply)
+            image.sprite = WindowGreen;
     }
 
+    /// <summary>
+    /// Causes button to disappear gradually
+    /// </summary>
+    /// <param name="data">Data to be shown on the button</param>
     public void Disappear()
     {
         Active = false;
@@ -95,6 +116,10 @@ public class MenuButton : MonoBehaviour
         targetTextAlpha = 0;
     }
 
+    /// <summary>
+    /// Causes button data to be replaced by new data gradually
+    /// </summary>
+    /// <param name="data">Data to be shown on the button</param>
     public void Replace(ButtonData data)
     {
         Data = data;
@@ -103,5 +128,27 @@ public class MenuButton : MonoBehaviour
         targetTextAlpha = 0;
 
         replacing = true;
+    }
+
+    /// <summary>
+    /// Grays out the button gradually
+    /// </summary>
+    /// <param name="data">Data to be shown on the button</param>
+    public void Deactivate()
+    {
+        Active = false;
+
+        targetImageAlpha = 0.5f;
+        targetTextAlpha = 0.5f;
+    }
+
+    /// <summary>
+    /// Reverts the grayed out effect gradually
+    /// </summary>
+    /// <param name="data">Data to be shown on the button</param>
+    public void Reactivate()
+    {
+        targetImageAlpha = 1;
+        targetTextAlpha = 1;
     }
 }

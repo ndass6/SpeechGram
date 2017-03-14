@@ -1,4 +1,4 @@
-﻿public enum ButtonType { Register, Navigation, Reply, Close }
+﻿public enum ButtonType { Back, Register, Close, Navigation, Reply }
 
 public struct ButtonData
 {
@@ -51,7 +51,7 @@ public struct ButtonData
             new ButtonData(ButtonType.Reply, "Yes", message: "Yes"),
             new ButtonData(ButtonType.Reply, "Yes", message: "Yes"),
             new ButtonData(ButtonType.Reply, "Yes", message: "Yes"),
-            new ButtonData(ButtonType.Reply, "Yes", message: "Yes"),
+            new ButtonData(ButtonType.Navigation, "Menu 2", destination: 1),
             new ButtonData(ButtonType.Reply, "Yes", message: "Yes"),
             new ButtonData(ButtonType.Reply, "Yes", message: "Yes"),
             new ButtonData(ButtonType.Reply, "Yes", message: "Yes"),

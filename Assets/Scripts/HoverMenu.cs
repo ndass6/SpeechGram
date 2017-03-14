@@ -35,6 +35,10 @@ public class HoverMenu : MonoBehaviour
                     bool close = true;
                     switch(button.Data.Type)
                     {
+                        case ButtonType.Back:
+                            StartCoroutine(MenuReplace(0));
+                            close = false;
+                            break;
                         case ButtonType.Register:
                             Microphone.registeringNewUser = true;
                             break;
@@ -71,7 +75,8 @@ public class HoverMenu : MonoBehaviour
 
     private IEnumerator MenuAppear(int menu)
     {
-        BackButton.Appear(new ButtonData(ButtonType.Navigation, "Back", destination: 0));
+        BackButton.Appear(new ButtonData(ButtonType.Back, "Go Back"));
+        BackButton.Deactivate();
         RegisterButton.Appear(new ButtonData(ButtonType.Register, "Register New Speaker"));
         CloseButton.Appear(new ButtonData(ButtonType.Close, "Close Menu"));
         for(int i = 0; i < MenuButton.NUM_BUTTONS; i++)
@@ -95,6 +100,11 @@ public class HoverMenu : MonoBehaviour
 
     private IEnumerator MenuReplace(int menu)
     {
+        if(menu == 0)
+            BackButton.Deactivate();
+        else
+            BackButton.Reactivate();
+
         for(int i = 0; i < MenuButton.NUM_BUTTONS; i++)
             ReplyButtons[i].Replace(ButtonData.Buttons[menu, i]);
         yield return null;
