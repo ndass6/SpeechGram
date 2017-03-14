@@ -64,11 +64,14 @@ public class HoverMenu : MonoBehaviour
             // Set menu position to directly in front of user
             transform.position = Camera.main.transform.position + Camera.main.transform.forward * 5;
 
-            gameObject.SetActive(true);
-            Chatroom.gameObject.SetActive(false);
-
-            StartCoroutine(MenuAppear(0));
+            Chatroom.Disappear();
         }
+    }
+
+    public void Appear()
+    {
+        gameObject.SetActive(true);
+        StartCoroutine(MenuAppear(0));
     }
 
     #region Animation coroutines
@@ -96,14 +99,14 @@ public class HoverMenu : MonoBehaviour
         int[] list = new int[] { 3, 7, 11, 10, 9, 8, 4, 0, 1, 2, 6, 5 };
         for(int i = 0; i < MenuButton.NUM_BUTTONS; i++)
         {
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(0.04f);
             ReplyButtons[list[i]].Disappear();
         }
 
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(0.6f);
 
         gameObject.SetActive(false);
-        Chatroom.gameObject.SetActive(true);
+        Chatroom.Appear();
     }
 
     private IEnumerator MenuReplace(int menu)

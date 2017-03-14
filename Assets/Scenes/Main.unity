@@ -2370,6 +2370,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 696e8671d4ad2fb409d2a6dc102ef27f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HoverMenu: {fileID: 1038451415}
   MessagePrefab: {fileID: 114061614484825238, guid: 3f292e384f9db4e4e9cd739a544c6d0a,
     type: 2}
 --- !u!114 &1351036163

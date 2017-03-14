@@ -10,20 +10,32 @@ This application was developed in a 3-week timeframe for the 2017's Microsoft Im
 
 ## Build and Installation
 
+We have packaged the app into a UWP appx package, but it requires a lot of work in order to sideload onto the HoloLens. We recommend that users just download the latest build [found here](https://github.com/ndass6/Speechgram/releases) and continue on with the instructions. Otherwise, users have two other options:
+
+1. You can find the UWP appx package in the `Package` folder of the latest release [found here](https://github.com/ndass6/Speechgram/releases). You will need to follow [this guide](https://docs.microsoft.com/en-us/windows/uwp/packaging/packaging-uwp-apps#sideload-your-app-package) to sideload the package onto the HoloLens
+2. You can download the source code on this repo and follow the `Build source code` instructions below
+
+Common instructions for building the source code or running the app from the latest build:
+
 1. Install **[Visual Studio 2015 Update 3](https://www.visualstudio.com/downloads/)**
 2. Ensure that **Tools** and **Windows 10 SDK** is selected when installing Visual Studio
 3. Install **[Unity 5.5.1f1](https://unity3d.com/get-unity/download/archive)**
+4. Insure that the HoloLens is connected to the Internet. This is not needed for building the app, but is needed during application use
 
-### Run the App from the Build Folder
+### Run the App from the Build 
 1. Download the latest build release of this app [found here](https://github.com/ndass6/Speechgram/releases)
 2. Extract the zip to an empty folder
 3. Open up the solution file (`Speechgram.sln` in the `Build` folder) in Microsoft Visual Studio
 4. Connect the HoloLens to your computer. Make sure your laptop is authorized to access your device (you might be prompted to enter a pin on your computer, follow the instructions on the pop-up display)
 5. Select `Release, x86, Device` for the three dropdowns in the top to deploy to the Microsoft Hololens
 
+If the build fails, make sure to follow the messages in the console to fix the issues. Otherwise, just try building again :)
+
 ![Alt text](Deploy.png?raw=true "Title")
 
 ### Build source code
+
+These instructions are not needed if you use the latest build of the app (above).
 
 1. Clone this repo to an empty folder
 2. Create a folder named `Build`
@@ -40,8 +52,6 @@ This application was developed in a 3-week timeframe for the 2017's Microsoft Im
 7. Follow the instructions above in the `Run the App from the Build File` from step 3
 
 ![Alt text](Build Settings.png?raw=true "Title")
-
-If the build fails, make sure to follow the messages in the console to fix the issues. Otherwise, just try building again :)
 
 If the instructions above don't work:
 * [Here](https://developer.microsoft.com/en-us/windows/holographic/install_the_tools) are general instructions on how to install the tools.
