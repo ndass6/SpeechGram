@@ -13,6 +13,7 @@ This application was developed in a 3-week timeframe for the 2017's Microsoft Im
 1. Install **[Visual Studio 2015 Update 3](https://www.visualstudio.com/downloads/)**
 2. Ensure that **Tools** and **Windows 10 SDK** is selected when installing Visual Studio
 3. Install **[Unity 5.5.1f1](https://unity3d.com/get-unity/download/archive)**
+4. Insure that the HoloLens is connected to the Internet
 
 ### Run the App from the Build Folder
 1. Download the latest build release of this app [found here](https://github.com/ndass6/Speechgram/releases)
