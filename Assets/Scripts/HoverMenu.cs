@@ -100,7 +100,7 @@ public class HoverMenu : MonoBehaviour
             ReplyButtons[list[i]].Disappear();
         }
 
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.8f);
 
         gameObject.SetActive(false);
         Chatroom.gameObject.SetActive(true);

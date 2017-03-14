@@ -11,8 +11,8 @@ public class ChatroomManager : MonoBehaviour
 
     public void Start()
     {
-        messages = transform.FindChild("Messages");
-        targetTotalOffset = ((RectTransform)transform).sizeDelta.y / 2 - 0.38f;
+        messages = transform.GetChild(0).GetChild(0);
+        targetTotalOffset = ((RectTransform)transform).sizeDelta.y / 2 - 0.4f;
         messages.transform.localPosition = new Vector3(0, targetTotalOffset, 0);
     }
 
@@ -32,7 +32,7 @@ public class ChatroomManager : MonoBehaviour
         float height = temp.GetComponent<Text>().preferredHeight;
         temp.transform.localPosition += new Vector3(0, -messageOffset * temp.transform.localScale.y, 0);
         messageOffset += height;
-        targetTotalOffset = Mathf.Max(((RectTransform)transform).sizeDelta.y / 2 - 0.38f, 
-            -((RectTransform)transform).sizeDelta.y / 2 + messageOffset * temp.transform.localScale.y - 0.33f);
+        targetTotalOffset = Mathf.Max(((RectTransform)transform).sizeDelta.y / 2 - 0.4f, 
+            -((RectTransform)transform).sizeDelta.y / 2 + messageOffset * temp.transform.localScale.y - 0.25f);
     }
 }
