@@ -15,7 +15,7 @@ public class TestMouseInput : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.P))
         {
             string text = "Test message: ";
-            for(int i = 0; i < Random.Range(0, 20); i++)
+            for(int i = 0; i < Random.Range(100, 200); i++)
                 text += "a ";
             Chatroom.AddMessage("Guy", text);
         }
