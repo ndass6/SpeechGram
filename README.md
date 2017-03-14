@@ -10,7 +10,7 @@ This application was developed in a 3-week timeframe for the 2017's Microsoft Im
 
 ## Build and Installation
 
-We have packaged the app into a UWP appx package, but it requires a lot of work in order to sideload onto the HoloLens. We recommend that users just download the latest build [found here](https://github.com/ndass6/Speechgram/releases) and follow the instructions in the section below. Otherwise, users have two other options:
+We have packaged the app into a UWP appx package, but it requires a lot of work in order to sideload onto the HoloLens. We recommend that users just download the latest build [found here](https://github.com/ndass6/Speechgram/releases) and continue on with the instructions. Otherwise, users have two other options:
 
 1. You can find the UWP appx package in the `Package` folder of the latest release [found here](https://github.com/ndass6/Speechgram/releases). You will need to follow [this guide](https://docs.microsoft.com/en-us/windows/uwp/packaging/packaging-uwp-apps#sideload-your-app-package) to sideload the package onto the HoloLens
 2. You can download the source code on this repo and follow the `Build source code` instructions below
