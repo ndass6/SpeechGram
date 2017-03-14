@@ -81,16 +81,24 @@ public class HoverMenu : MonoBehaviour
         CloseButton.Appear(new ButtonData(ButtonType.Close, "Close Menu"));
         for(int i = 0; i < MenuButton.NUM_BUTTONS; i++)
             ReplyButtons[i].Appear(ButtonData.Buttons[menu, i]);
+
         yield return null;
     }
 
     private IEnumerator MenuDisappear()
     {
         BackButton.Disappear();
+        yield return new WaitForSeconds(0.1f);
         RegisterButton.Disappear();
+        yield return new WaitForSeconds(0.1f);
         CloseButton.Disappear();
+
+        int[] list = new int[] { 3, 7, 11, 10, 9, 8, 4, 0, 1, 2, 6, 5 };
         for(int i = 0; i < MenuButton.NUM_BUTTONS; i++)
-            ReplyButtons[i].Disappear();
+        {
+            yield return new WaitForSeconds(0.05f);
+            ReplyButtons[list[i]].Disappear();
+        }
 
         yield return new WaitForSeconds(1);
 
@@ -105,9 +113,19 @@ public class HoverMenu : MonoBehaviour
         else
             BackButton.Reactivate();
 
+        ArrayList list = new ArrayList();
         for(int i = 0; i < MenuButton.NUM_BUTTONS; i++)
-            ReplyButtons[i].Replace(ButtonData.Buttons[menu, i]);
-        yield return null;
+            list.Add(i);
+
+        while(list.Count != 0)
+        {
+            int index = Random.Range(0, list.Count);
+            int current = (int)list[index];
+            list.RemoveAt(index);
+            ReplyButtons[current].Replace(ButtonData.Buttons[menu, current]);
+
+            yield return new WaitForSeconds(0.05f);
+        }
     }
 
     #endregion
