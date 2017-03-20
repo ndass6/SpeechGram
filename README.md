@@ -86,6 +86,6 @@ For now, be wary of the following time limits:
 ## Contact
 
 Contact any one of the contributors for additional information!
-* tnareddy3@gatech.edu
-* ndass6@gatech.edu
-* jonathanchen@gatech.edu
+* Teju Nareddy: tnareddy3@gatech.edu
+* Nathan Dass: ndass6@gatech.edu
+* Jonathan Chen: jonathanchen@gatech.edu
